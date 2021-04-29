@@ -1,0 +1,10 @@
+prefix=<<install>>
+exec_prefix=${prefix}
+includedir=${prefix}/<<include>>
+libdir=${exec_prefix}/<<lib>>
+
+Name: unyte-https-notif
+Description: Unyte HTTPS-notif protocol library
+Version: 0.0.1
+Cflags: -I${includedir}/unyte-https-notif
+Libs: -L${libdir} -lunyte-https-notif
