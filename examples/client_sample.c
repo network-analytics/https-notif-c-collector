@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
   unyte_https_collector_t *collector = unyte_start_collector(&options);
 
 
+  //TODO: getc to not exit program
+  (void)getc(stdin);
   unyte_free_collector(collector);
   return 0;
 }

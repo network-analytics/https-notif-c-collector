@@ -4,57 +4,7 @@
 #include "unyte_https_version.h"
 #include "unyte_https_defaults.h"
 #include "unyte_https_queue.h"
-
-// MHD
-#include <string.h>
-#include <sys/types.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#include <microhttpd.h>
-#define PORT 8888
-
-#define PAGE "<html><head><title>libmicrohttpd demo</title>" \
-             "</head><body>libmicrohttpd demo</body></html>"
-// end MHD
-
-static enum MHD_Result
-ahc_echo(void *cls,
-         struct MHD_Connection *connection,
-         const char *url,
-         const char *method,
-         const char *version,
-         const char *upload_data,
-         size_t *upload_data_size,
-         void **ptr)
-{
-  static int dummy;
-  const char *page = cls;
-  struct MHD_Response *response;
-  int ret;
-
-  if (0 != strcmp(method, "GET"))
-  {
-    printf("GETTT!\n");
-    return MHD_NO; /* unexpected method */
-  }
-  if (&dummy != *ptr)
-  {
-    // The first time only the headers are valid, do not respond in the first round...
-    *ptr = &dummy;
-    return MHD_YES;
-  }
-  if (0 != *upload_data_size)
-    return MHD_NO; /* upload data in a GET!? */
-  *ptr = NULL;     /* clear context pointer */
-  response = MHD_create_response_from_buffer(strlen(page),
-                                             (void *)page,
-                                             MHD_RESPMEM_PERSISTENT);
-  ret = MHD_queue_response(connection,
-                           MHD_HTTP_OK,
-                           response);
-  MHD_destroy_response(response);
-  return ret;
-}
+#include "unyte_server_daemon.h"
 
 unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options)
 {
@@ -63,20 +13,10 @@ unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options)
   unyte_https_collector_t *collector = (unyte_https_collector_t *)malloc(sizeof(unyte_https_collector_t));
 
   //TODO: output_queue size from options
-  collector->queue = unyte_https_queue_init(DF_OUTPUT_QUEUE_SIZE);
-  struct MHD_Daemon *d = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
-                                          options->port,
-                                          NULL,
-                                          NULL,
-                                          &ahc_echo,
-                                          PAGE,
-                                          MHD_OPTION_END);
-
-  if (d == NULL)
-    return NULL;
-
-  //TODO: getc to not exit program
-  (void)getc(stdin);
+  unyte_https_queue_t *queue = unyte_https_queue_init(DF_OUTPUT_QUEUE_SIZE);
+  
+  collector->queue = queue;
+  collector->https_daemon = start_https_server_daemon(options->port, queue);
 
   return collector;
 }

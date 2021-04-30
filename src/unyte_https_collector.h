@@ -7,6 +7,7 @@
 typedef struct
 {
   unyte_https_queue_t *queue;
+  struct MHD_Daemon *https_daemon;
   // unyte_https_queue_t *monitoring_queue;
   // pthread_t *main_thread;
   // int *sockfd;

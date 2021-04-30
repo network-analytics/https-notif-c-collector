@@ -17,11 +17,11 @@ HTTPS_LIB=$(shell pkg-config --cflags --libs libmicrohttpd)
 ###### c-collector source code ######
 SDIR=src
 ODIR=obj
-_OBJS=unyte_https_queue.o unyte_https_collector.o
+_OBJS=unyte_https_queue.o unyte_https_collector.o unyte_https_utils.o unyte_server_daemon.o unyte_https_capabilities.o
 OBJS=$(patsubst %,$(ODIR)/%,$(_OBJS))
 
 ###### c-collector source headers ######
-_DEPS=unyte_https_queue.h unyte_https_collector.h
+_DEPS=unyte_https_queue.h unyte_https_collector.h unyte_https_utils.h unyte_server_daemon.h unyte_https_defaults.h unyte_https_capabilities.h
 DEPS=$(patsubst %,$(SDIR)/%,$(_DEPS))
 
 ###### c-collector examples ######
