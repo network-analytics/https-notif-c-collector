@@ -12,6 +12,8 @@ TCMALLOCFLAGS=
 USE_LIB=$(shell pkg-config --cflags --libs unyte-https-notif)
 USE_LIB=
 
+HTTPS_LIB=$(shell pkg-config --cflags --libs libmicrohttpd)
+
 ###### c-collector source code ######
 SDIR=src
 ODIR=obj
@@ -44,7 +46,7 @@ libunyte-https-notif.so: $(OBJS)
 	$(CC) -shared -o libunyte-https-notif.so $(OBJS)
 
 client_sample: $(EXAMPLES_ODIR)/client_sample.o $(OBJS)
-	$(CC) -pthread -o $@ $^ $(LDFLAGS)
+	$(CC) -pthread -o $@ $^ $(LDFLAGS) $(HTTPS_LIB)
 
 install: libunyte-https-notif.so
 	./install.sh

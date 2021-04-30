@@ -1,0 +1,6 @@
+#ifndef UNYTE_HTTPS_DEFAULTS_H
+#define UNYTE_HTTPS_DEFAULTS_H
+
+#define DF_OUTPUT_QUEUE_SIZE 500
+
+#endif
