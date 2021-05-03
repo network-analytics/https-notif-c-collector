@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <microhttpd.h>
 #include "unyte_https_queue.h"
 #include "unyte_https_utils.h"
@@ -21,9 +22,10 @@ int push_body_output_queue(struct MHD_Connection *connection, unyte_https_queue_
 
   msg->payload = body;
   msg->payload_length = body_length;
-  // TODO: src + port
-  msg->src_addr = 0;
-  msg->src_port = 0;
+  const union MHD_ConnectionInfo *info = MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
+  struct sockaddr_in *sk = (struct sockaddr_in *)info->client_addr;
+  msg->src_addr = ntohl(sk->sin_addr.s_addr);
+  msg->src_port = ntohs(sk->sin_port);
   return unyte_https_queue_write(output_queue, msg);
 }
 
@@ -94,6 +96,7 @@ static enum MHD_Result dispatcher(void *cls,
                                   size_t *upload_data_size,
                                   void **con_cls)
 {
+  (void)version; /* Unused. Silent compiler warning. */
   daemon_input_t *input = (daemon_input_t *)cls;
   // if POST malloc buffer to save body
   if ((NULL == *con_cls) && (0 == strcmp(method, "POST")))
@@ -122,7 +125,7 @@ static enum MHD_Result dispatcher(void *cls,
     if (*upload_data_size != 0)
     {
       body_buff->buffer = malloc(*upload_data_size + 1); // buff_size + \0
-      
+
       if (body_buff->buffer == NULL)
       {
         printf("Malloc failed\n");
@@ -150,6 +153,9 @@ static enum MHD_Result dispatcher(void *cls,
 
 void daemon_panic(void *cls, const char *file, unsigned int line, const char *reason)
 {
+  (void)cls;  /* Unused. Silent compiler warning. */
+  (void)file; /* Unused. Silent compiler warning. */
+  (void)line; /* Unused. Silent compiler warning. */
   //TODO:
   printf("HTTPS server panic: %s\n", reason);
 }
@@ -182,7 +188,7 @@ struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *o
 
   daemon->daemon = d;
   daemon->daemon_in = daemon_in;
-  
+
   return daemon;
 }
 
