@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "../src/unyte_https_collector.h"
+#include "../src/unyte_https_utils.h"
 
 #define MAX_TO_RECEIVE 5
 
@@ -26,13 +27,17 @@ int main(int argc, char *argv[])
   while (count < MAX_TO_RECEIVE)
   {
     void *res = unyte_https_queue_read(collector->queue);
-    printf("%s\n", (char *)res);
-    free(res);
+    unyte_https_msg_met_t *msg = (unyte_https_msg_met_t *)res;
+    
+    print_https_notif_msg(msg, stdout);
+    free(msg->payload);
+    free(msg);
     count++;
   }
 
-  //TODO: getc to not exit program
-  (void)getc(stdin);
+  // Stopping the collector
+  unyte_stop_collector(collector);
+  // Freeing all dynamic mallocs
   unyte_free_collector(collector);
   return 0;
 }

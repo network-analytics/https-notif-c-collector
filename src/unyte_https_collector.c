@@ -12,7 +12,7 @@ unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options)
 
   //TODO: output_queue size from options
   unyte_https_queue_t *queue = unyte_https_queue_init(DF_OUTPUT_QUEUE_SIZE);
-  struct MHD_Daemon *daemon = start_https_server_daemon(options->port, queue);
+  struct unyte_daemon *daemon = start_https_server_daemon(options->port, queue);
 
   if (queue == NULL || collector == NULL)
   {
@@ -44,6 +44,9 @@ int unyte_free_collector(unyte_https_collector_t *collector)
 
   free(collector->queue->data);
   free(collector->queue);
+  free(collector->https_daemon->daemon_in->capabilities);
+  free(collector->https_daemon->daemon_in);
+  free(collector->https_daemon);
   free(collector);
   return 0;
 }

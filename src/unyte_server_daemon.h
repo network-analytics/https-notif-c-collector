@@ -2,6 +2,7 @@
 #define UNYTE_SERVER_DAEMOM_H
 
 #include <sys/types.h>
+#include <stdint.h>
 #include "unyte_https_queue.h"
 #include "unyte_https_capabilities.h"
 
@@ -20,13 +21,19 @@ typedef struct daemon_input
   unyte_https_capabilities_t *capabilities;
 } daemon_input_t;
 
+struct unyte_daemon
+{
+  daemon_input_t *daemon_in;
+  struct MHD_Daemon *daemon;
+};
+
 struct unyte_https_body
 {
   char *buffer;
   size_t buffer_size;
 };
 
-struct MHD_Daemon *start_https_server_daemon(uint port, unyte_https_queue_t *output_queue);
-int stop_https_server_daemon(struct MHD_Daemon *daemon);
+struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *output_queue);
+int stop_https_server_daemon(struct unyte_daemon *daemon);
 
 #endif
