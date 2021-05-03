@@ -8,17 +8,33 @@
 
 unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options)
 {
-  printf("Starting collector on %s:%d\n", options->address, options->port);
-
   unyte_https_collector_t *collector = (unyte_https_collector_t *)malloc(sizeof(unyte_https_collector_t));
 
   //TODO: output_queue size from options
   unyte_https_queue_t *queue = unyte_https_queue_init(DF_OUTPUT_QUEUE_SIZE);
-  
+  struct MHD_Daemon *daemon = start_https_server_daemon(options->port, queue);
+
+  if (queue == NULL || collector == NULL)
+  {
+    printf("Malloc error\n");
+    exit(EXIT_FAILURE);
+  }
+
+  if (daemon == NULL)
+  {
+    printf("Error creating daemon\n");
+    exit(EXIT_FAILURE);
+  }
+
   collector->queue = queue;
-  collector->https_daemon = start_https_server_daemon(options->port, queue);
+  collector->https_daemon = daemon;
 
   return collector;
+}
+
+int unyte_stop_collector(unyte_https_collector_t *collector)
+{
+  return stop_https_server_daemon(collector->https_daemon);
 }
 
 int unyte_free_collector(unyte_https_collector_t *collector)
