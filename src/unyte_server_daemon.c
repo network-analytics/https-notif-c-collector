@@ -188,6 +188,7 @@ struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *o
                                           &dispatcher, daemon_in,
                                           MHD_OPTION_HTTPS_MEM_KEY, key_pem,
                                           MHD_OPTION_HTTPS_MEM_CERT, cert_pem,
+                                          MHD_OPTION_LISTENING_ADDRESS_REUSE, 1,
                                           MHD_OPTION_END);
 
   MHD_set_panic_func(daemon_panic, NULL);

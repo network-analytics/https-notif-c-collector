@@ -15,5 +15,5 @@ TODO:
 TODO:
 
 ### TLS layer
-- `openssl genrsa -out server.key 1024`
+- `openssl genrsa -out server.key 2048`
 - `openssl req -days 365 -out server.pem -new -x509 -key server.key`
