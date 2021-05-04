@@ -18,6 +18,8 @@ typedef struct
 {
   char *address;
   uint16_t port;
+  char *key_pem;
+  char *cert_pem;
 } unyte_https_options_t;
 
 unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options);

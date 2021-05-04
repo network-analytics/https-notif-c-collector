@@ -6,13 +6,34 @@
 #include "unyte_https_queue.h"
 #include "unyte_server_daemon.h"
 
+void set_defaults(unyte_https_options_t *options)
+{
+  if (options == NULL)
+  {
+    printf("Invalid options.\n");
+    exit(EXIT_FAILURE);
+  }
+  if (options->address == NULL)
+  {
+    printf("Address is mandatory.\n");
+    exit(EXIT_FAILURE);
+  }
+  if ((options->cert_pem == NULL) || (options->key_pem == NULL))
+  {
+    printf("TLS certs are not valid\n");
+    exit(EXIT_FAILURE);
+  }
+}
+
 unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options)
 {
   unyte_https_collector_t *collector = (unyte_https_collector_t *)malloc(sizeof(unyte_https_collector_t));
 
+  set_defaults(options);
+
   //TODO: output_queue size from options
   unyte_https_queue_t *queue = unyte_https_queue_init(DF_OUTPUT_QUEUE_SIZE);
-  struct unyte_daemon *daemon = start_https_server_daemon(options->port, queue);
+  struct unyte_daemon *daemon = start_https_server_daemon(options->port, queue, options->key_pem, options->cert_pem);
 
   if (queue == NULL || collector == NULL)
   {
@@ -51,7 +72,7 @@ int unyte_free_collector(unyte_https_collector_t *collector)
   return 0;
 }
 
-int unyte_https_free_msg(unyte_https_msg_met_t * msg)
+int unyte_https_free_msg(unyte_https_msg_met_t *msg)
 {
   free(msg->payload);
   free(msg);

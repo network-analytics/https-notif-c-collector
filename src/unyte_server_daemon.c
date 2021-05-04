@@ -167,7 +167,7 @@ void daemon_panic(void *cls, const char *file, unsigned int line, const char *re
   printf("HTTPS server panic: %s\n", reason);
 }
 
-struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *output_queue)
+struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *output_queue, const char *key_pem, const char *cert_pem)
 {
   struct unyte_daemon *daemon = (struct unyte_daemon *)malloc(sizeof(struct unyte_daemon));
   daemon_input_t *daemon_in = (daemon_input_t *)malloc(sizeof(daemon_input_t));
@@ -183,12 +183,11 @@ struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *o
   daemon_in->output_queue = output_queue;
   daemon_in->capabilities = capabilities;
 
-  struct MHD_Daemon *d = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
-                                          port,
-                                          NULL,
-                                          NULL,
-                                          &dispatcher,
-                                          daemon_in,
+  struct MHD_Daemon *d = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_SSL,
+                                          port, NULL, NULL,
+                                          &dispatcher, daemon_in,
+                                          MHD_OPTION_HTTPS_MEM_KEY, key_pem,
+                                          MHD_OPTION_HTTPS_MEM_CERT, cert_pem,
                                           MHD_OPTION_END);
 
   MHD_set_panic_func(daemon_panic, NULL);

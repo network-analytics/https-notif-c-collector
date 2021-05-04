@@ -55,3 +55,6 @@ client_sample
 libunyte-https-notif.so
 unyte-https-notif.pc
 .vscode
+
+*.key
+*.pem

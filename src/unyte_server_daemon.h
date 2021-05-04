@@ -33,7 +33,7 @@ struct unyte_https_body
   size_t buffer_size;
 };
 
-struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *output_queue);
+struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *output_queue, const char *key_pem, const char *cert_pem);
 int stop_https_server_daemon(struct unyte_daemon *daemon);
 
 #endif
