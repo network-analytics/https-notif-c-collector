@@ -10,6 +10,7 @@ typedef struct unyte_msg_with_metadata
   uint32_t src_addr;
   char *payload;
   size_t payload_length;
+  char *content_type;
 } unyte_https_msg_met_t;
 
 void print_https_notif_msg(unyte_https_msg_met_t *msg, FILE *std);

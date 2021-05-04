@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "unyte_https_queue.h"
+#include "unyte_https_utils.h"
 
 typedef struct
 {
@@ -22,6 +23,7 @@ typedef struct
 unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options);
 int unyte_stop_collector(unyte_https_collector_t *collector);
 int unyte_free_collector(unyte_https_collector_t *collector);
+int unyte_https_free_msg(unyte_https_msg_met_t * msg);
 char *unyte_udp_notif_version();
 
 #endif

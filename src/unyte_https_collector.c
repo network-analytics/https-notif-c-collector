@@ -51,6 +51,13 @@ int unyte_free_collector(unyte_https_collector_t *collector)
   return 0;
 }
 
+int unyte_https_free_msg(unyte_https_msg_met_t * msg)
+{
+  free(msg->payload);
+  free(msg);
+  return 0;
+}
+
 int get_int_len(int value)
 {
   int l = 1;

@@ -1,5 +1,3 @@
-#include "unyte_server_daemon.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -8,10 +6,11 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <microhttpd.h>
+#include "unyte_server_daemon.h"
 #include "unyte_https_queue.h"
 #include "unyte_https_utils.h"
 
-int push_body_output_queue(struct MHD_Connection *connection, unyte_https_queue_t *output_queue, char *body, size_t body_length)
+int push_body_output_queue(struct MHD_Connection *connection, unyte_https_queue_t *output_queue, struct unyte_https_body *body_buff, char *req_content_type)
 {
   unyte_https_msg_met_t *msg = (unyte_https_msg_met_t *)malloc(sizeof(unyte_https_msg_met_t));
   if (msg == NULL)
@@ -20,8 +19,9 @@ int push_body_output_queue(struct MHD_Connection *connection, unyte_https_queue_
     return -1;
   }
 
-  msg->payload = body;
-  msg->payload_length = body_length;
+  msg->payload = body_buff->buffer;
+  msg->payload_length = body_buff->buffer_size;
+  msg->content_type = req_content_type;
   const union MHD_ConnectionInfo *info = MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
   struct sockaddr_in *sk = (struct sockaddr_in *)info->client_addr;
   msg->src_addr = ntohl(sk->sin_addr.s_addr);
@@ -63,15 +63,22 @@ enum MHD_Result post_notification(struct MHD_Connection *connection, unyte_https
 {
   struct MHD_Response *response = MHD_create_response_from_buffer(0, (void *)NULL, MHD_RESPMEM_PERSISTENT);
   const char *req_content_type = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, CONTENT_TYPE);
+  char *type = NULL;
   // if application/xml send xml format else json
   if (0 == strcmp(req_content_type, MIME_XML))
+  {
     MHD_add_response_header(response, CONTENT_TYPE, MIME_XML);
-  else
+    type = MIME_XML;
+  }
+  else if (0 == strcmp(req_content_type, MIME_JSON))
+  {
     MHD_add_response_header(response, CONTENT_TYPE, MIME_JSON);
+    type = MIME_JSON;
+  }
 
   enum MHD_Result http_ret;
   // OK
-  if (0 == push_body_output_queue(connection, output_queue, body_buff->buffer, body_buff->buffer_size))
+  if (0 == push_body_output_queue(connection, output_queue, body_buff, type))
   {
     http_ret = MHD_queue_response(connection, MHD_HTTP_NO_CONTENT, response);
     MHD_destroy_response(response);

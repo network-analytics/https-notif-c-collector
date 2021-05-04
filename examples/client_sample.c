@@ -28,14 +28,15 @@ int main(int argc, char *argv[])
   {
     void *res = unyte_https_queue_read(collector->queue);
     unyte_https_msg_met_t *msg = (unyte_https_msg_met_t *)res;
-    
+
     print_https_notif_msg(msg, stdout);
-    free(msg->payload);
-    free(msg);
+
+    // freeing struct
+    unyte_https_free_msg(msg);
     count++;
   }
 
-  // Stopping the collector
+  // Stopping the collector and the https server
   unyte_stop_collector(collector);
   // Freeing all dynamic mallocs
   unyte_free_collector(collector);
