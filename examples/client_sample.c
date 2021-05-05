@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../src/unyte_https_collector.h"
 #include "../src/unyte_https_utils.h"
@@ -21,17 +22,16 @@ char *load_file(const char *file_path)
 
   fseek(infile, 0L, SEEK_END);
   numbytes = ftell(infile);
+  rewind(infile);
 
-  fseek(infile, 0L, SEEK_SET);
-
-  buffer = (char *)calloc(numbytes, sizeof(char));
+  buffer = (char *)malloc(sizeof(char) * (numbytes + 1));
 
   if (buffer == NULL)
     return NULL;
 
   fread(buffer, sizeof(char), numbytes, infile);
   fclose(infile);
-
+  buffer[numbytes] = '\0';
   return buffer;
 }
 
@@ -76,7 +76,9 @@ int main(int argc, char *argv[])
     // printf("unyte_https_get_payload_length: %lu\n", unyte_https_get_payload_length(msg));
     // printf("unyte_https_get_content_type: %s\n", unyte_https_get_content_type(msg));
 
-    // freeing struct
+    fflush(stdout);
+
+    // Freeing struct
     unyte_https_free_msg(msg);
     count++;
   }

@@ -1,7 +1,8 @@
 #!/bin/bash
 
-INSTALL_DIR=/usr/local/lib
-INSTALL_INCLUDE=/usr/local/include
+INSTALL_DIR=/usr/local
+LIB_DIR=lib
+H_DIR=include
 PKG_DIR=/usr/lib/pkgconfig
 
 if [ "$EUID" -ne 0 ]
@@ -13,28 +14,28 @@ fi
 echo "Adding current $PKG_DIR to PKG_CONFIG_PATH env"
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
 
-echo "Building and installing unyte shared lib in: $INSTALL_DIR"
+echo "Building and installing unyte shared lib in: $INSTALL_DIR/$LIB_DIR"
 
 make build
 
-echo "Moving build file to $INSTALL_DIR"
-install libunyte-https-notif.so $INSTALL_DIR/libunyte-https-notif.so
+echo "Moving build file to $INSTALL_DIR/$LIB_DIR"
+install libunyte-https-notif.so $INSTALL_DIR/$LIB_DIR/libunyte-https-notif.so
 
 if [ $? -ne 0 ]
 then
-  echo "Could not install shared lib to $INSTALL_DIR" >&2
+  echo "Could not install shared lib to $INSTALL_DIR/$LIB_DIR" >&2
   echo "Try sudo"
   exit 1
 fi
 
-if [ ! -d "$INSTALL_INCLUDE/unyte-https-notif" ]
+if [ ! -d "$INSTALL_DIR/$H_DIR/unyte-https-notif" ]
 then
-  echo "Creating $INSTALL_INCLUDE/unyte-https-notif directory"
-  mkdir -p $INSTALL_INCLUDE/unyte-https-notif
+  echo "Creating $INSTALL_DIR/$H_DIR/unyte-https-notif directory"
+  mkdir -p $INSTALL_DIR/$H_DIR/unyte-https-notif
 fi
 
-echo "Copying headers to $INSTALL_INCLUDE/unyte-https-notif"
-cp src/*.h $INSTALL_INCLUDE/unyte-https-notif
+echo "Copying headers to $INSTALL_DIR/$H_DIR/unyte-https-notif"
+cp src/*.h $INSTALL_DIR/$H_DIR/unyte-https-notif
 
 if [ $? -ne 0 ]
 then
