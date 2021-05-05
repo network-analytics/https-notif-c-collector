@@ -73,12 +73,16 @@ int main()
     unyte_https_msg_met_t *msg = (unyte_https_msg_met_t *)res;
 
     // TODO: Process the HTTPS-notif message here
-    // TODO:
+    printf("unyte_https_get_src_port: %u\n", unyte_https_get_src_port(msg));
+    printf("unyte_https_get_src_addr: %u\n", unyte_https_get_src_addr(msg));
+    printf("unyte_https_get_payload: %s\n", unyte_https_get_payload(msg));
+    printf("unyte_https_get_payload_length: %lu\n", unyte_https_get_payload_length(msg));
+    printf("unyte_https_get_content_type: %s\n", unyte_https_get_content_type(msg));
 
-    // printing HTTPS-notif message on stdout
+    // Printing HTTPS-notif message on stdout
     print_https_notif_msg(msg, stdout);
 
-    // freeing struct
+    // Freeing struct
     unyte_https_free_msg(msg);
   }
 
@@ -108,7 +112,11 @@ typedef struct unyte_msg_with_metadata
 } unyte_https_msg_met_t;
 ```
 ##### Getters for segments data
-TODO:
+- `uint16_t unyte_https_get_src_port(unyte_https_msg_met_t *msg);` : source port of the message
+- `uint32_t unyte_https_get_src_addr(unyte_https_msg_met_t *msg);` : source address of the message
+- `char *unyte_https_get_payload(unyte_https_msg_met_t *msg);` : payload buffer
+- `size_t unyte_https_get_payload_length(unyte_https_msg_met_t *msg);` : payload buffer size
+- `char *unyte_https_get_content_type(unyte_https_msg_met_t *msg);` : content type of the message (application/json | application/xml)
 
 ### TLS layer
 To use/test TLS layer, you should generate the certificate first :

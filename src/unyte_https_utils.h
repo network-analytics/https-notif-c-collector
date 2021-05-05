@@ -15,4 +15,10 @@ typedef struct unyte_msg_with_metadata
 
 void print_https_notif_msg(unyte_https_msg_met_t *msg, FILE *std);
 
+uint16_t unyte_https_get_src_port(unyte_https_msg_met_t *msg);
+uint32_t unyte_https_get_src_addr(unyte_https_msg_met_t *msg);
+char *unyte_https_get_payload(unyte_https_msg_met_t *msg);
+size_t unyte_https_get_payload_length(unyte_https_msg_met_t *msg);
+char *unyte_https_get_content_type(unyte_https_msg_met_t *msg);
+
 #endif

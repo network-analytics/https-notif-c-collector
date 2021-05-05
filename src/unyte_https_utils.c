@@ -17,3 +17,9 @@ void print_https_notif_msg(unyte_https_msg_met_t *msg, FILE *std)
   else
     fprintf(std, "Content type: null\n");
 }
+
+uint16_t unyte_https_get_src_port(unyte_https_msg_met_t *msg) { return msg->src_port; }
+uint32_t unyte_https_get_src_addr(unyte_https_msg_met_t *msg) { return msg->src_addr; }
+char *unyte_https_get_payload(unyte_https_msg_met_t *msg) { return msg->payload; }
+size_t unyte_https_get_payload_length(unyte_https_msg_met_t *msg) { return msg->payload_length; }
+char *unyte_https_get_content_type(unyte_https_msg_met_t *msg) { return msg->content_type; }

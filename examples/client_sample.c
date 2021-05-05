@@ -70,6 +70,12 @@ int main(int argc, char *argv[])
 
     print_https_notif_msg(msg, stdout);
 
+    // printf("unyte_https_get_src_port: %u\n", unyte_https_get_src_port(msg));
+    // printf("unyte_https_get_src_addr: %u\n", unyte_https_get_src_addr(msg));
+    // printf("unyte_https_get_payload: %s\n", unyte_https_get_payload(msg));
+    // printf("unyte_https_get_payload_length: %lu\n", unyte_https_get_payload_length(msg));
+    // printf("unyte_https_get_content_type: %s\n", unyte_https_get_content_type(msg));
+
     // freeing struct
     unyte_https_free_msg(msg);
     count++;
