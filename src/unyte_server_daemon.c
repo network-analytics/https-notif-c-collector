@@ -31,10 +31,20 @@ int push_body_output_queue(struct MHD_Connection *connection, unyte_https_queue_
 
 enum MHD_Result not_implemented(struct MHD_Connection *connection)
 {
-  const char *page = NOT_IMPLEMENTED;
+  const char *page = UHTTPS_NOT_IMPLEMENTED;
   struct MHD_Response *response = MHD_create_response_from_buffer(strlen(page), (void *)page, MHD_RESPMEM_PERSISTENT);
-  MHD_add_response_header(response, CONTENT_TYPE, MIME_JSON);
+  MHD_add_response_header(response, UHTTPS_CONTENT_TYPE, UHTTPS_MIME_JSON);
   enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_NOT_IMPLEMENTED, response);
+  MHD_destroy_response(response);
+  return ret;
+}
+
+enum MHD_Result bad_request(struct MHD_Connection *connection)
+{
+  const char *page = UHTTPS_BAD_REQUEST;
+  struct MHD_Response *response = MHD_create_response_from_buffer(strlen(page), (void *)page, MHD_RESPMEM_PERSISTENT);
+  MHD_add_response_header(response, UHTTPS_CONTENT_TYPE, UHTTPS_MIME_JSON);
+  enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, response);
   MHD_destroy_response(response);
   return ret;
 }
@@ -42,17 +52,17 @@ enum MHD_Result not_implemented(struct MHD_Connection *connection)
 enum MHD_Result get_capabilities(struct MHD_Connection *connection, unyte_https_capabilities_t *capabilities)
 {
   struct MHD_Response *response;
-  const char *req_content_type = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, CONTENT_TYPE);
+  const char *req_content_type = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, UHTTPS_CONTENT_TYPE);
   // if application/xml send xml format else json
-  if (0 == strcmp(req_content_type, MIME_XML))
+  if (0 == strcmp(req_content_type, UHTTPS_MIME_XML))
   {
     response = MHD_create_response_from_buffer(capabilities->xml_length, (void *)capabilities->xml, MHD_RESPMEM_PERSISTENT);
-    MHD_add_response_header(response, CONTENT_TYPE, MIME_XML);
+    MHD_add_response_header(response, UHTTPS_CONTENT_TYPE, UHTTPS_MIME_XML);
   }
   else
   {
     response = MHD_create_response_from_buffer(capabilities->json_length, (void *)capabilities->json, MHD_RESPMEM_PERSISTENT);
-    MHD_add_response_header(response, CONTENT_TYPE, MIME_JSON);
+    MHD_add_response_header(response, UHTTPS_CONTENT_TYPE, UHTTPS_MIME_JSON);
   }
   enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
   MHD_destroy_response(response);
@@ -62,18 +72,18 @@ enum MHD_Result get_capabilities(struct MHD_Connection *connection, unyte_https_
 enum MHD_Result post_notification(struct MHD_Connection *connection, unyte_https_queue_t *output_queue, struct unyte_https_body *body_buff)
 {
   struct MHD_Response *response = MHD_create_response_from_buffer(0, (void *)NULL, MHD_RESPMEM_PERSISTENT);
-  const char *req_content_type = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, CONTENT_TYPE);
+  const char *req_content_type = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, UHTTPS_CONTENT_TYPE);
   char *type = NULL;
   // if application/xml send xml format else json
-  if (0 == strcmp(req_content_type, MIME_XML))
+  if (0 == strcmp(req_content_type, UHTTPS_MIME_XML))
   {
-    MHD_add_response_header(response, CONTENT_TYPE, MIME_XML);
-    type = MIME_XML;
+    MHD_add_response_header(response, UHTTPS_CONTENT_TYPE, UHTTPS_MIME_XML);
+    type = UHTTPS_MIME_XML;
   }
-  else if (0 == strcmp(req_content_type, MIME_JSON))
+  else if (0 == strcmp(req_content_type, UHTTPS_MIME_JSON))
   {
-    MHD_add_response_header(response, CONTENT_TYPE, MIME_JSON);
-    type = MIME_JSON;
+    MHD_add_response_header(response, UHTTPS_CONTENT_TYPE, UHTTPS_MIME_JSON);
+    type = UHTTPS_MIME_JSON;
   }
 
   enum MHD_Result http_ret;
@@ -149,10 +159,7 @@ static enum MHD_Result dispatcher(void *cls,
     else if (NULL != body_buff->buffer)
       return post_notification(connection, input->output_queue, body_buff);
     else
-    {
-      // TODO: if no body : what do we do ?
-      return not_implemented(connection);
-    }
+      return bad_request(connection);
   }
   else
     return not_implemented(connection);
