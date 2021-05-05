@@ -51,6 +51,9 @@ client_sample: $(EXAMPLES_ODIR)/client_sample.o $(OBJS)
 install: libunyte-https-notif.so
 	./install.sh
 
+uninstall:
+	./uninstall.sh
+
 build: libunyte-https-notif.so
 
 clean:
