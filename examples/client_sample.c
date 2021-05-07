@@ -5,7 +5,7 @@
 #include "../src/unyte_https_collector.h"
 #include "../src/unyte_https_utils.h"
 
-#define MAX_TO_RECEIVE 5
+#define MAX_TO_RECEIVE 20
 #define SERVERKEYFILE "server.key"
 #define SERVERCERTFILE "server.pem"
 

@@ -1,6 +1,5 @@
 ###### GCC options ######
 CC=gcc
-# LDFLAGS=-g -L./ -lunyte-udp-notif
 LDFLAGS=-g
 CFLAGS=-Wextra -Wall -ansi -g -std=c11 -D_GNU_SOURCE -fPIC
 
@@ -14,6 +13,7 @@ USE_LIB=
 
 ## Using libmicrohttpd
 HTTPS_LIB=$(shell pkg-config --cflags --libs libmicrohttpd)
+LIBCURL_LIB=$(shell pkg-config --cflags --libs libcurl)
 
 ###### c-collector source code ######
 SDIR=src
@@ -28,9 +28,6 @@ DEPS=$(patsubst %,$(SDIR)/%,$(_DEPS))
 ###### c-collector examples ######
 EXAMPLES_DIR=examples
 EXAMPLES_ODIR=$(EXAMPLES_DIR)/obj
-
-###### c-collector test files ######
-TDIR=test
 
 BINS=client_sample
 
@@ -57,4 +54,4 @@ uninstall:
 build: libunyte-https-notif.so
 
 clean:
-	rm $(ODIR)/*.o $(EXAMPLES_ODIR)/*.o $(TDIR)/*.o $(BINS) libunyte-https-notif.so
+	rm $(ODIR)/*.o $(EXAMPLES_ODIR)/*.o $(BINS) libunyte-https-notif.so
