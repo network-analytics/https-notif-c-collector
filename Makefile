@@ -29,7 +29,7 @@ DEPS=$(patsubst %,$(SDIR)/%,$(_DEPS))
 EXAMPLES_DIR=examples
 EXAMPLES_ODIR=$(EXAMPLES_DIR)/obj
 
-BINS=client_sample
+BINS=client_sample client_continuous
 
 all: libunyte-https-notif.so $(BINS)
 
@@ -43,6 +43,9 @@ libunyte-https-notif.so: $(OBJS)
 	$(CC) -shared -o libunyte-https-notif.so $(OBJS) $(HTTPS_LIB)
 
 client_sample: $(EXAMPLES_ODIR)/client_sample.o $(OBJS)
+	$(CC) -pthread -o $@ $^ $(LDFLAGS) $(HTTPS_LIB)
+
+client_continuous: $(EXAMPLES_ODIR)/client_continuous.o $(OBJS)
 	$(CC) -pthread -o $@ $^ $(LDFLAGS) $(HTTPS_LIB)
 
 install: libunyte-https-notif.so

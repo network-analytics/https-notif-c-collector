@@ -35,12 +35,40 @@ char *load_file(const char *file_path)
   return buffer;
 }
 
+struct https_th_input
+{
+  unyte_https_queue_t *queue;
+  uint count;
+};
+
+void *t_https_read(void *in)
+{
+  struct https_th_input *input = (struct https_th_input *)in;
+
+  pthread_t thread_id = pthread_self();
+  uint count = 0;
+  while (count < input->count)
+  {
+    void *res = unyte_https_queue_read(input->queue);
+    unyte_https_msg_met_t *msg = (unyte_https_msg_met_t *)res;
+
+    printf("%ld;%lu\n", thread_id, unyte_https_get_payload_length(msg));
+
+    fflush(stdout);
+
+    // Freeing struct
+    unyte_https_free_msg(msg);
+    count++;
+  }
+  return 0;
+}
+
 int main(int argc, char *argv[])
 {
   if (argc != 3)
   {
     printf("Error: arguments not valid\n");
-    printf("Usage: ./client_sample <ip> <port>\n");
+    printf("Usage: ./client_continuous <ip> <port>\n");
     exit(1);
   }
 
@@ -59,29 +87,23 @@ int main(int argc, char *argv[])
   options.cert_pem = cert_pem;
   options.key_pem = key_pem;
 
+  uint client_threads = 5;
+  pthread_t *threads = (pthread_t *)malloc(sizeof(pthread_t) * client_threads);
+
   unyte_https_collector_t *collector = unyte_start_collector(&options);
   printf("Starting collector on %s:%d\n", options.address, options.port);
 
-  uint count = 0;
-  while (count < MAX_TO_RECEIVE)
+  struct https_th_input input = {0};
+  input.queue = collector->queue;
+  input.count = 100;
+
+  for (uint i = 0; i < client_threads; i++)
   {
-    void *res = unyte_https_queue_read(collector->queue);
-    unyte_https_msg_met_t *msg = (unyte_https_msg_met_t *)res;
-
-    print_https_notif_msg(msg, stdout);
-
-    // printf("unyte_https_get_src_port: %u\n", unyte_https_get_src_port(msg));
-    // printf("unyte_https_get_src_addr: %u\n", unyte_https_get_src_addr(msg));
-    // printf("unyte_https_get_payload: %s\n", unyte_https_get_payload(msg));
-    // printf("unyte_https_get_payload_length: %lu\n", unyte_https_get_payload_length(msg));
-    // printf("unyte_https_get_content_type: %s\n", unyte_https_get_content_type(msg));
-
-    fflush(stdout);
-
-    // Freeing struct
-    unyte_https_free_msg(msg);
-    count++;
+    pthread_create((threads + i), NULL, t_https_read, &input);
   }
+
+  for (uint o = 0; o < client_threads; o++)
+    pthread_join(*(threads + o), NULL);
 
   // Stopping the collector and the https server
   unyte_stop_collector(collector);
@@ -90,5 +112,6 @@ int main(int argc, char *argv[])
 
   free(key_pem);
   free(cert_pem);
+  free(threads);
   return 0;
 }
