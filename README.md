@@ -121,6 +121,7 @@ typedef struct unyte_msg_with_metadata
 ### TLS layer
 To use/test TLS layer, you should generate the certificate first :
 ```
-$ openssl genrsa -out server.key 2048
-$ openssl req -days 365 -out server.pem -new -x509 -key server.key
+$ openssl genrsa -out private.key 2048
+$ openssl req -days 365 -out certificate.pem -new -x509 -key private.key
+$ openssl rsa -in private.key -out public.pem -outform PEM -pubout
 ```

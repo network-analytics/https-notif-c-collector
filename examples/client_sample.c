@@ -6,8 +6,8 @@
 #include "../src/unyte_https_utils.h"
 
 #define MAX_TO_RECEIVE 200
-#define SERVERKEYFILE "server.key"
-#define SERVERCERTFILE "server.pem"
+#define SERVERKEYFILE "private.key"
+#define SERVERCERTFILE "certificate.pem"
 
 char *load_file(const char *file_path)
 {

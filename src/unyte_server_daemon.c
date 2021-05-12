@@ -54,7 +54,7 @@ enum MHD_Result get_capabilities(struct MHD_Connection *connection, unyte_https_
   struct MHD_Response *response;
   const char *req_content_type = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, UHTTPS_CONTENT_TYPE);
   // if application/xml send xml format else json
-  if (0 == strcmp(req_content_type, UHTTPS_MIME_XML))
+  if (req_content_type != NULL && 0 == strcmp(req_content_type, UHTTPS_MIME_XML))
   {
     response = MHD_create_response_from_buffer(capabilities->xml_length, (void *)capabilities->xml, MHD_RESPMEM_PERSISTENT);
     MHD_add_response_header(response, UHTTPS_CONTENT_TYPE, UHTTPS_MIME_XML);
@@ -97,6 +97,7 @@ enum MHD_Result post_notification(struct MHD_Connection *connection, unyte_https
   // any ret value from queue_t different from 0 --> error
   else
   {
+    printf("client_queue_is_full\n");
     //TODO: What error should the collector send on error ?
     http_ret = MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
     MHD_destroy_response(response);
