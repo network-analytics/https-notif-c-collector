@@ -10,13 +10,13 @@
 #include "unyte_https_queue.h"
 #include "unyte_https_utils.h"
 
-int push_body_output_queue(struct MHD_Connection *connection, unyte_https_queue_t *output_queue, struct unyte_https_body *body_buff, char *req_content_type)
+unyte_https_msg_met_t *generate_https_msg_met(struct MHD_Connection *connection, struct unyte_https_body *body_buff, char *req_content_type)
 {
   unyte_https_msg_met_t *msg = (unyte_https_msg_met_t *)malloc(sizeof(unyte_https_msg_met_t));
   if (msg == NULL)
   {
     printf("Malloc failed\n");
-    return -1;
+    return NULL;
   }
 
   msg->payload = body_buff->buffer;
@@ -26,7 +26,7 @@ int push_body_output_queue(struct MHD_Connection *connection, unyte_https_queue_
   struct sockaddr_in *sk = (struct sockaddr_in *)info->client_addr;
   msg->src_addr = ntohl(sk->sin_addr.s_addr);
   msg->src_port = ntohs(sk->sin_port);
-  return unyte_https_queue_write(output_queue, msg);
+  return msg;
 }
 
 enum MHD_Result not_implemented(struct MHD_Connection *connection)
@@ -87,21 +87,27 @@ enum MHD_Result post_notification(struct MHD_Connection *connection, unyte_https
   }
 
   enum MHD_Result http_ret;
-  // OK
-  if (0 == push_body_output_queue(connection, output_queue, body_buff, type))
+  unyte_https_msg_met_t *parsed_msg = generate_https_msg_met(connection, body_buff, type);
+  // Malloc failed
+  if (parsed_msg == NULL)
+  {
+    http_ret = MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+    MHD_destroy_response(response);
+  } // OK
+  else if (0 == unyte_https_queue_write(output_queue, parsed_msg))
   {
     http_ret = MHD_queue_response(connection, MHD_HTTP_NO_CONTENT, response);
     MHD_destroy_response(response);
-    free(body_buff);
-  }
-  // any ret value from queue_t different from 0 --> error
+  } // any ret value from queue_t different from 0 --> error
   else
   {
     printf("client_queue_is_full\n");
     //TODO: What error should the collector send on error ?
     http_ret = MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
     MHD_destroy_response(response);
+    free(parsed_msg);
   }
+  free(body_buff);
   return http_ret;
 }
 
@@ -215,7 +221,7 @@ struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *o
 int stop_https_server_daemon(struct unyte_daemon *daemon)
 {
   MHD_stop_daemon(daemon->daemon);
-  // int ret = MHD_quiesce_daemon(daemon->daemon);
+  // MHD_socket ret = MHD_quiesce_daemon(daemon->daemon);
   // if (ret < 0)
   // {
   //   printf("Error stopping listenning for connections %d\n", ret);

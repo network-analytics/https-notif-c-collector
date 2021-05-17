@@ -2,7 +2,7 @@
 Library for collecting HTTPS-notif protocol messages defined on the IETF draft [draft-ietf-netconf-https-notif-08](https://datatracker.ietf.org/doc/html/draft-ietf-netconf-https-notif-08).
 
 ## Dependencies
-The library uses `libmicrohttpd` as a HTTPS server. The library should be compiled and installed including TLS support
+The library uses `libmicrohttpd` as a HTTPS server. **The library should be compiled and installed including TLS support.**
 
 - [libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/): https library
     - `libgnutls28-dev libgcrypt20`: dependencies for libmicrohttpd TLS module (tested on `Ubuntu`)
@@ -28,7 +28,7 @@ You should remove the export of the lib in your bashrc manually yourself to full
 The collector allows to read HTTPS-notif protocol messages from a ip/port specified on the parameters. It allows to get directly the buffer and the metadata of the message in a struct.
 
 The api is in `unyte_https_collector.h` :
-- `unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options)` from `unyte_https_collector.h`: Initialize the HTTPS-notif messages collector. It accepts a struct with different options: address (the IP address to listen to), port (port to listen to).
+- `unyte_https_collector_t *unyte_https_start_collector(unyte_https_options_t *options)` from `unyte_https_collector.h`: Initialize the HTTPS-notif messages collector. It accepts a struct with different options: address (the IP address to listen to), port (port to listen to).
 - `void *unyte_https_queue_read(unyte_https_queue_t *queue)` from `unyte_https_queue.h` : read from a queue a struct with all the message buffer and metadata.
 - `int unyte_https_free_msg(unyte_https_msg_met_t * msg)` from `unyte_https_collector.h`: free all struct used on a message received.
 
@@ -41,8 +41,8 @@ Simple example of usage of a client [client_sample.c](examples/client_sample.c):
 #include <unyte-https-notif/unyte_https_collector.h>
 #include <unyte-https-notif/unyte_https_utils.h>
 
-#define SERVERKEYFILE "server.key"
-#define SERVERCERTFILE "server.pem"
+#define SERVERKEYFILE "private.key"
+#define SERVERCERTFILE "certificate.pem"
 
 int main()
 {
@@ -64,7 +64,7 @@ int main()
   options.key_pem = key_pem;
 
   // Initialize collector
-  unyte_https_collector_t *collector = unyte_start_collector(&options);
+  unyte_https_collector_t *collector = unyte_https_start_collector(&options);
 
   // Example with infinite loop, change the break condition to be able to free all struct gracefully
   while (1)
@@ -87,10 +87,10 @@ int main()
   }
 
   // Stopping the collector and the https server
-  unyte_stop_collector(collector);
+  unyte_https_stop_collector(collector);
 
   // Freeing all dynamic mallocs
-  unyte_free_collector(collector);
+  unyte_https_free_collector(collector);
 
   // Freeing key_pem and cer_pem pointers
   free(key_pem);
@@ -123,5 +123,4 @@ To use/test TLS layer, you should generate the certificate first :
 ```
 $ openssl genrsa -out private.key 2048
 $ openssl req -days 365 -out certificate.pem -new -x509 -key private.key
-$ openssl rsa -in private.key -out public.pem -outform PEM -pubout
 ```

@@ -20,11 +20,12 @@ typedef struct
   uint16_t port;
   char *key_pem;
   char *cert_pem;
+  uint output_queue_size;  // output queue size
 } unyte_https_options_t;
 
-unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options);
-int unyte_stop_collector(unyte_https_collector_t *collector);
-int unyte_free_collector(unyte_https_collector_t *collector);
+unyte_https_collector_t *unyte_https_start_collector(unyte_https_options_t *options);
+int unyte_https_stop_collector(unyte_https_collector_t *collector);
+int unyte_https_free_collector(unyte_https_collector_t *collector);
 int unyte_https_free_msg(unyte_https_msg_met_t * msg);
 char *unyte_udp_notif_version();
 

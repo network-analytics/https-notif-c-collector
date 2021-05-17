@@ -59,3 +59,5 @@ unyte-https-notif.pc
 
 *.key
 *.pem
+
+**/*.log

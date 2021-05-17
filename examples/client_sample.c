@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
   options.cert_pem = cert_pem;
   options.key_pem = key_pem;
 
-  unyte_https_collector_t *collector = unyte_start_collector(&options);
+  unyte_https_collector_t *collector = unyte_https_start_collector(&options);
   printf("Starting collector on %s:%d\n", options.address, options.port);
 
   uint count = 0;
@@ -84,9 +84,9 @@ int main(int argc, char *argv[])
   }
 
   // Stopping the collector and the https server
-  unyte_stop_collector(collector);
+  unyte_https_stop_collector(collector);
   // Freeing all dynamic mallocs
-  unyte_free_collector(collector);
+  unyte_https_free_collector(collector);
 
   free(key_pem);
   free(cert_pem);

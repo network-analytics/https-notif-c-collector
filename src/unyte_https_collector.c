@@ -23,16 +23,19 @@ void set_defaults(unyte_https_options_t *options)
     printf("TLS certs are not valid\n");
     exit(EXIT_FAILURE);
   }
+  if (options->output_queue_size <= 0)
+  {
+    options->output_queue_size = DF_OUTPUT_QUEUE_SIZE;
+  }
 }
 
-unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options)
+unyte_https_collector_t *unyte_https_start_collector(unyte_https_options_t *options)
 {
   unyte_https_collector_t *collector = (unyte_https_collector_t *)malloc(sizeof(unyte_https_collector_t));
 
   set_defaults(options);
 
-  //TODO: output_queue size from options
-  unyte_https_queue_t *queue = unyte_https_queue_init(DF_OUTPUT_QUEUE_SIZE);
+  unyte_https_queue_t *queue = unyte_https_queue_init(options->output_queue_size);
   struct unyte_daemon *daemon = start_https_server_daemon(options->port, queue, options->key_pem, options->cert_pem);
 
   if (queue == NULL || collector == NULL)
@@ -53,12 +56,12 @@ unyte_https_collector_t *unyte_start_collector(unyte_https_options_t *options)
   return collector;
 }
 
-int unyte_stop_collector(unyte_https_collector_t *collector)
+int unyte_https_stop_collector(unyte_https_collector_t *collector)
 {
   return stop_https_server_daemon(collector->https_daemon);
 }
 
-int unyte_free_collector(unyte_https_collector_t *collector)
+int unyte_https_free_collector(unyte_https_collector_t *collector)
 {
   while (unyte_https_is_queue_empty(collector->queue) != 0)
     free(unyte_https_queue_read(collector->queue));

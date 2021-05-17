@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
   uint client_threads = atoi(argv[4]);
   pthread_t *threads = (pthread_t *)malloc(sizeof(pthread_t) * client_threads);
 
-  unyte_https_collector_t *collector = unyte_start_collector(&options);
+  unyte_https_collector_t *collector = unyte_https_start_collector(&options);
   printf("Starting collector on %s:%d\n", options.address, options.port);
 
   struct https_th_input input = {0};
@@ -147,9 +147,9 @@ int main(int argc, char *argv[])
     pthread_join(*(threads + o), NULL);
 
   // Stopping the collector and the https server
-  unyte_stop_collector(collector);
+  unyte_https_stop_collector(collector);
   // Freeing all dynamic mallocs
-  unyte_free_collector(collector);
+  unyte_https_free_collector(collector);
 
   free(key_pem);
   free(cert_pem);
