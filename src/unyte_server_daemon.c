@@ -103,7 +103,7 @@ enum MHD_Result post_notification(struct MHD_Connection *connection, unyte_https
   {
     printf("client_queue_is_full\n");
     //TODO: What error should the collector send on error ?
-    http_ret = MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+    http_ret = MHD_queue_response(connection, MHD_HTTP_SERVICE_UNAVAILABLE, response);
     MHD_destroy_response(response);
     free(parsed_msg);
   }
