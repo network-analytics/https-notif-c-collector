@@ -2,6 +2,7 @@
 #define H_UNYTE_HTTPS_COLLECTOR
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "unyte_https_queue.h"
 #include "unyte_https_utils.h"
 
@@ -20,7 +21,9 @@ typedef struct
   uint16_t port;
   char *key_pem;
   char *cert_pem;
-  uint output_queue_size;  // output queue size
+  uint output_queue_size;       // output queue size
+  bool disable_json_encoding;   // disable json encoding messages
+  bool disable_xml_encoding;    // disable xml encoding messages
 } unyte_https_options_t;
 
 unyte_https_collector_t *unyte_https_start_collector(unyte_https_options_t *options);

@@ -69,7 +69,10 @@ enum MHD_Result get_capabilities(struct MHD_Connection *connection, unyte_https_
   return ret;
 }
 
-enum MHD_Result post_notification(struct MHD_Connection *connection, unyte_https_queue_t *output_queue, struct unyte_https_body *body_buff)
+enum MHD_Result post_notification(struct MHD_Connection *connection,
+                                  unyte_https_queue_t *output_queue,
+                                  struct unyte_https_body *body_buff,
+                                  unyte_https_capabilities_t *capabilities)
 {
   struct MHD_Response *response = MHD_create_response_from_buffer(0, (void *)NULL, MHD_RESPMEM_PERSISTENT);
   const char *req_content_type = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, UHTTPS_CONTENT_TYPE);
@@ -79,11 +82,27 @@ enum MHD_Result post_notification(struct MHD_Connection *connection, unyte_https
   {
     MHD_add_response_header(response, UHTTPS_CONTENT_TYPE, UHTTPS_MIME_XML);
     type = UHTTPS_MIME_XML;
+    if (!capabilities->enabled.xml_encoding)
+    {
+      enum MHD_Result http_ret_disabled = MHD_queue_response(connection, MHD_HTTP_UNSUPPORTED_MEDIA_TYPE, response);
+      MHD_destroy_response(response);
+      free(body_buff->buffer);
+      free(body_buff);
+      return http_ret_disabled;
+    }
   }
   else if (0 == strcmp(req_content_type, UHTTPS_MIME_JSON))
   {
     MHD_add_response_header(response, UHTTPS_CONTENT_TYPE, UHTTPS_MIME_JSON);
     type = UHTTPS_MIME_JSON;
+    if (!capabilities->enabled.json_encoding)
+    {
+      enum MHD_Result http_ret_disabled = MHD_queue_response(connection, MHD_HTTP_UNSUPPORTED_MEDIA_TYPE, response);
+      MHD_destroy_response(response);
+      free(body_buff->buffer);
+      free(body_buff);
+      return http_ret_disabled;
+    }
   }
 
   enum MHD_Result http_ret;
@@ -148,6 +167,7 @@ static enum MHD_Result dispatcher(void *cls,
     // if body exists, save body to use on next iteration
     if (*upload_data_size != 0)
     {
+      // TODO: ignore malloc if encoding not supported here ?
       body_buff->buffer = malloc(*upload_data_size + 1); // buff_size + \0
 
       if (body_buff->buffer == NULL)
@@ -164,7 +184,7 @@ static enum MHD_Result dispatcher(void *cls,
     }
     // having body buffer
     else if (NULL != body_buff->buffer)
-      return post_notification(connection, input->output_queue, body_buff);
+      return post_notification(connection, input->output_queue, body_buff, input->capabilities);
     else
       return bad_request(connection);
   }
@@ -181,7 +201,8 @@ void daemon_panic(void *cls, const char *file, unsigned int line, const char *re
   printf("HTTPS server panic: %s\n", reason);
 }
 
-struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *output_queue, const char *key_pem, const char *cert_pem)
+struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *output_queue, const char *key_pem, const char *cert_pem,
+                                               bool disable_json, bool disable_xml)
 {
   struct unyte_daemon *daemon = (struct unyte_daemon *)malloc(sizeof(struct unyte_daemon));
   daemon_input_t *daemon_in = (daemon_input_t *)malloc(sizeof(daemon_input_t));
@@ -192,7 +213,12 @@ struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *o
     return NULL;
   }
 
-  unyte_https_capabilities_t *capabilities = init_capabilities_buff();
+  unyte_https_capabilities_t *capabilities = init_capabilities_buff(disable_json, disable_xml);
+  if (capabilities == NULL)
+  {
+    printf("Capabilities malloc failed or invalid\n");
+    return NULL;
+  }
 
   daemon_in->output_queue = output_queue;
   daemon_in->capabilities = capabilities;
@@ -227,4 +253,11 @@ int stop_https_server_daemon(struct unyte_daemon *daemon)
   //   printf("Error stopping listenning for connections %d\n", ret);
   // }
   return 0;
+}
+
+void free_https_server_daemon(struct unyte_daemon *daemon)
+{
+  free_capabilities_buff(daemon->daemon_in->capabilities);
+  free(daemon->daemon_in);
+  free(daemon);
 }

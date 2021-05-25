@@ -36,7 +36,7 @@ unyte_https_collector_t *unyte_https_start_collector(unyte_https_options_t *opti
   set_defaults(options);
 
   unyte_https_queue_t *queue = unyte_https_queue_init(options->output_queue_size);
-  struct unyte_daemon *daemon = start_https_server_daemon(options->port, queue, options->key_pem, options->cert_pem);
+  struct unyte_daemon *daemon = start_https_server_daemon(options->port, queue, options->key_pem, options->cert_pem, options->disable_json_encoding, options->disable_xml_encoding);
 
   if (queue == NULL || collector == NULL)
   {
@@ -68,9 +68,7 @@ int unyte_https_free_collector(unyte_https_collector_t *collector)
 
   free(collector->queue->data);
   free(collector->queue);
-  free(collector->https_daemon->daemon_in->capabilities);
-  free(collector->https_daemon->daemon_in);
-  free(collector->https_daemon);
+  free_https_server_daemon(collector->https_daemon);
   free(collector);
   return 0;
 }

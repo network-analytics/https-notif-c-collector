@@ -5,7 +5,7 @@
 #include "../src/unyte_https_collector.h"
 #include "../src/unyte_https_utils.h"
 
-#define MAX_TO_RECEIVE 200
+#define MAX_TO_RECEIVE 10
 #define SERVERKEYFILE "private.key"
 #define SERVERCERTFILE "certificate.pem"
 
@@ -58,6 +58,8 @@ int main(int argc, char *argv[])
   options.port = atoi(argv[2]);
   options.cert_pem = cert_pem;
   options.key_pem = key_pem;
+  options.disable_xml_encoding = true;
+  options.disable_json_encoding = false;
 
   unyte_https_collector_t *collector = unyte_https_start_collector(&options);
   printf("Starting collector on %s:%d\n", options.address, options.port);
