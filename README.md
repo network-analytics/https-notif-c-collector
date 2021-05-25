@@ -62,6 +62,8 @@ int main()
   options.port = atoi(argv[2]);
   options.cert_pem = cert_pem;
   options.key_pem = key_pem;
+  options.disable_xml_encoding = false;   // enable xml encoding
+  options.disable_json_encoding = false;  // enable json encoding
 
   // Initialize collector
   unyte_https_collector_t *collector = unyte_https_start_collector(&options);
