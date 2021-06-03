@@ -8,7 +8,7 @@ The library uses `libmicrohttpd` as a HTTPS server. **The library should be comp
     - `libgnutls28-dev libgcrypt20`: dependencies for libmicrohttpd TLS module (tested on `Ubuntu`)
 
 ## Build & install 
-To build the project and test example clients, just `make` on root folder. Il will compile with gcc all dependences and the clients.
+To build the project and test example clients, just `make` on root folder. Il will compile with gcc all dependencies and the clients.
 
 ### Installing
 To install the library on a machine, run `make install` with sudo and `export.sh` without sudo. Export script will export the LD_LIBRARY_PATH on user space.
@@ -22,7 +22,7 @@ $ ./export.sh
 ```
 $ sudo make uninstall
 ```
-You should remove the export of the lib in your bashrc manually yourself to fully remove the lib.
+You should remove the export of the lib in your `.bashrc` manually yourself to fully remove the lib.
 
 ## Usage
 The collector allows to read HTTPS-notif protocol messages from a ip/port specified on the parameters. It allows to get directly the buffer and the metadata of the message in a struct.

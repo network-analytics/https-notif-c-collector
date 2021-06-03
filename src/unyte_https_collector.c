@@ -31,9 +31,11 @@ void set_defaults(unyte_https_options_t *options)
     options->output_queue_size = DF_OUTPUT_QUEUE_SIZE;
   if (options->sock_buff_size <= 0)
     options->sock_buff_size = DF_SOCK_BUFF_SIZE;
+  if (options->sock_listen_backlog <= 0)
+    options->sock_listen_backlog = DF_SOCK_LISTEN_BACKLOG;
 }
 
-unyte_https_sock_t *unyte_https_init_socket(char *address, uint16_t port, uint64_t sock_buff_size)
+unyte_https_sock_t *unyte_https_init_socket(char *address, uint16_t port, uint64_t sock_buff_size, int backlog)
 {
   unyte_https_sock_t *conn = (unyte_https_sock_t *)malloc(sizeof(unyte_https_sock_t));
   struct sockaddr_in *servaddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
@@ -79,7 +81,7 @@ unyte_https_sock_t *unyte_https_init_socket(char *address, uint16_t port, uint64
     exit(EXIT_FAILURE);
   }
 
-  if (listen(*sockfd, 1) != 0)
+  if (listen(*sockfd, backlog) != 0)
   {
     perror("Listen failed");
     close(*sockfd);
@@ -106,7 +108,7 @@ unyte_https_collector_t *unyte_https_start_collector(unyte_https_options_t *opti
     exit(EXIT_FAILURE);
   }
 
-  unyte_https_sock_t *conn = unyte_https_init_socket(options->address, options->port, options->sock_buff_size);
+  unyte_https_sock_t *conn = unyte_https_init_socket(options->address, options->port, options->sock_buff_size, options->sock_listen_backlog);
   struct unyte_daemon *daemon = start_https_server_daemon(conn,
                                                           queue,
                                                           options->key_pem,
