@@ -16,6 +16,12 @@
 #define UHTTPS_POST_BUFFER_SIZE 65536
 #define UHTTPS_POST_BODY_SIZE 65536
 
+typedef struct unyte_socket
+{
+  struct sockaddr_in *addr; // The socket addr
+  int *sockfd;              // The socket file descriptor
+} unyte_https_sock_t;
+
 typedef struct daemon_input
 {
   unyte_https_queue_t *output_queue;
@@ -34,7 +40,7 @@ struct unyte_https_body
   size_t buffer_size;
 };
 
-struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *output_queue, const char *key_pem, const char *cert_pem, bool disable_json, bool disable_xml);
+struct unyte_daemon *start_https_server_daemon(unyte_https_sock_t *conn, unyte_https_queue_t *output_queue, const char *key_pem, const char *cert_pem, bool disable_json, bool disable_xml);
 int stop_https_server_daemon(struct unyte_daemon *daemon);
 void free_https_server_daemon(struct unyte_daemon *daemon);
 
