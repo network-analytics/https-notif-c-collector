@@ -6,6 +6,7 @@ The library uses `libmicrohttpd` as a HTTPS server. **The library should be comp
 
 - [libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/): https library
     - `libgnutls28-dev libgcrypt20`: dependencies for libmicrohttpd TLS module (tested on `Ubuntu`)
+    - `gnutls-devel`: dependencies for libmicrohttpd TLS module (tested on `CentOS 7`)
 
 ## Build & install 
 To build the project and test example clients, just `make` on root folder. Il will compile with gcc all dependencies and the clients.

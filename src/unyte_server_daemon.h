@@ -16,13 +16,13 @@
 #define UHTTPS_POST_BUFFER_SIZE 65536
 #define UHTTPS_POST_BODY_SIZE 65536
 
-typedef struct unyte_socket
+typedef struct
 {
   struct sockaddr_in *addr; // The socket addr
   int *sockfd;              // The socket file descriptor
 } unyte_https_sock_t;
 
-typedef struct daemon_input
+typedef struct
 {
   unyte_https_queue_t *output_queue;
   unyte_https_capabilities_t *capabilities;
