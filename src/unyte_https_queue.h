@@ -35,13 +35,6 @@ void *unyte_https_queue_read(unyte_https_queue_t *queue);
 int unyte_https_queue_write(unyte_https_queue_t *queue, void *handle);
 
 /**
- * Puts the element *handle to the *queue destroying the oldest element if it is full.
- * Return 0 if *handle introduced in the queue.
- * Return 1 if queue was full and oldest element from the *queue has been destroyed.
- */
-int unyte_queue_destructive_write(unyte_https_queue_t *queue, void *handle);
-
-/**
  * Check wether or not the queue is empty.
  * Return 1 for not empty. 
  * Return 0 for empty.

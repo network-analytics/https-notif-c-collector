@@ -201,7 +201,7 @@ void daemon_panic(void *cls, const char *file, unsigned int line, const char *re
   printf("HTTPS server panic: %s\n", reason);
 }
 
-struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *output_queue, const char *key_pem, const char *cert_pem,
+struct unyte_daemon *start_https_server_daemon(unyte_https_sock_t *conn, unyte_https_queue_t *output_queue, const char *key_pem, const char *cert_pem,
                                                bool disable_json, bool disable_xml)
 {
   struct unyte_daemon *daemon = (struct unyte_daemon *)malloc(sizeof(struct unyte_daemon));
@@ -224,15 +224,15 @@ struct unyte_daemon *start_https_server_daemon(uint port, unyte_https_queue_t *o
   daemon_in->capabilities = capabilities;
 
   struct MHD_Daemon *d = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_SSL,
-                                          port, NULL, NULL,
+                                          0, NULL, NULL,
                                           &dispatcher, daemon_in,
                                           MHD_OPTION_HTTPS_MEM_KEY, key_pem,
                                           MHD_OPTION_HTTPS_MEM_CERT, cert_pem,
-                                          MHD_OPTION_LISTENING_ADDRESS_REUSE, 1,
+                                          MHD_OPTION_LISTEN_SOCKET, *conn->sockfd,
                                           MHD_OPTION_END);
   if (NULL == d)
   {
-    printf("Error initializing MHD_start_daemon\n");
+    perror("Error initializing MHD_start_daemon");
     exit(EXIT_FAILURE);
   }
 
