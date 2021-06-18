@@ -110,3 +110,4 @@ src/.deps
 src/.libs
 config.h
 libtool
+**/obj/*.h

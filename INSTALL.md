@@ -44,6 +44,20 @@ On Centos (tested on `Centos 8`):
 $ sudo yum install gperftools gperftools-devel
 ```
 
+#### Using eBPF loadbalancer based on IP only
+To use eBPF loadbalancing `Python3` is needed for eBPF compilation.
+
+On Ubuntu:
+```shell
+$ # install python3
+$ sudo apt install linux-headers-$(uname -r) clang bpf
+```
+
+On Centos:
+```shell
+$ # TODO:
+```
+
 ## Compiling project 
 This project uses autotools to compile and install the library.
 

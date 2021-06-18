@@ -9,6 +9,7 @@
 #include "unyte_https_version.h"
 #include "unyte_https_defaults.h"
 #include "unyte_https_queue.h"
+#include "unyte_reuseport_user.h"
 
 void set_defaults(unyte_https_options_t *options)
 {
@@ -85,6 +86,12 @@ unyte_https_sock_t *unyte_https_init_socket(char *address, uint16_t port, uint64
   {
     perror("Listen failed");
     close(*sockfd);
+    exit(EXIT_FAILURE);
+  }
+
+  // TODO: set it optional
+  if (attach_loadbalancing_bpf_pgr(*sockfd) != 0)
+  {
     exit(EXIT_FAILURE);
   }
 
