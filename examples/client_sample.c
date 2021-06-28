@@ -1,3 +1,7 @@
+/**
+ * Sample to show how to consume HTTPS-notif protocol using the library
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,9 +10,12 @@
 #include "../src/unyte_https_utils.h"
 
 #define MAX_TO_RECEIVE 10
-#define SERVERKEYFILE "private.key"
-#define SERVERCERTFILE "certificate.pem"
+#define SERVERKEYFILE "private.key"      // Should be generated before run this sample
+#define SERVERCERTFILE "certificate.pem" // Should be generated before run this sample
 
+/**
+ * Read file and return bytes
+ */
 char *load_file(const char *file_path)
 {
   FILE *infile;
