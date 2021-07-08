@@ -4,7 +4,7 @@ Library for collecting HTTPS-notif protocol messages defined on the IETF draft [
 ## Dependencies
 The library uses `libmicrohttpd` as a HTTPS server. **The library should be compiled and installed including TLS support.**
 ### Ubuntu
-```
+```shell
 $ sudo apt install libgnutls28-dev libgcrypt20
 $ wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.73.tar.gz
 $ tar -xf libmicrohttpd-0.9.73.tar.gz
@@ -15,7 +15,7 @@ $ sudo make install
 ```
 
 ### Centos 7
-```
+```shell
 $ sudo yum install gnutls-devel
 $ wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.73.tar.gz
 $ tar -xf libmicrohttpd-0.9.73.tar.gz
@@ -30,7 +30,7 @@ This project uses autotools to compile and install the library.
 
 ### Installing
 To install the library on a linux machine.
-```
+```shell
 $ ./bootstrap
 $ ./configure         # See "./configure --help" for options
 $ make
@@ -44,7 +44,7 @@ There are some custom `./configure` options :
 - `--enable-tcmalloc`: enable compilation with tcmalloc instead of native malloc. tcmalloc should be installed first.
 
 ### Uninstalling
-```
+```shell
 $ sudo make uninstall
 ```
 You should remove the export of the lib in your `.bashrc` manually yourself to fully remove the lib.
@@ -60,7 +60,7 @@ The api is in `unyte_https_collector.h` :
 Simple example of usage of a client [client_sample.c](examples/client_sample.c):
 
 /!\ To run the samples, a TLS private key and certificate should be generated first. See [TLS layer](#TLS-layer).
-```
+```c
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -130,7 +130,7 @@ int main()
 
 ### Message data
 To process the message data, all the headers, meta-data and payload are found on the struct unyte_https_msg_met_t defined on unyte_https_utils.h:
-```
+```c
 typedef struct unyte_msg_with_metadata
 {
   uint16_t src_port;     // source port
@@ -149,7 +149,7 @@ typedef struct unyte_msg_with_metadata
 
 ### TLS layer
 To use/test TLS layer, you should generate the certificate first :
-```
+```shell
 $ openssl genrsa -out private.key 2048
 $ openssl req -days 365 -out certificate.pem -new -x509 -key private.key
 ```
