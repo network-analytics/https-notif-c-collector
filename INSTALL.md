@@ -76,6 +76,7 @@ There are some custom `./configure` options :
 - `--with-examples`: compile examples directory. Not compiled by default.
 - `--with-pkgconfigdir=[/own_path/pkgconfig]`: overwrite pkgconfig directory to install .pc file [default: ${PREFIX}/lib/pkgconfig]
 - `--enable-tcmalloc`: enable compilation with tcmalloc instead of native malloc. tcmalloc should be installed first.
+- `--enable-ebpf-loadbalancing`: enable eBPF reuseport loadbalancer to https-notif. Allows to launch multiple instances of the collector on the same port and use IP loadbalancing for the reuseport socket pool instead of IP/port (default by the kernel).
 
 ### Uninstalling
 ```shell
