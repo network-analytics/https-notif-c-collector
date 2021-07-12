@@ -9,7 +9,10 @@
 #include "unyte_https_version.h"
 #include "unyte_https_defaults.h"
 #include "unyte_https_queue.h"
+
+#if _USE_EBPF_REUSEPORT
 #include "unyte_reuseport_user.h"
+#endif
 
 void set_defaults(unyte_https_options_t *options)
 {
@@ -89,11 +92,12 @@ unyte_https_sock_t *unyte_https_init_socket(char *address, uint16_t port, uint64
     exit(EXIT_FAILURE);
   }
 
-  // TODO: set it optional
+#if _USE_EBPF_REUSEPORT
   if (attach_loadbalancing_bpf_pgr(*sockfd) != 0)
   {
     exit(EXIT_FAILURE);
   }
+#endif
 
   conn->addr = servaddr;
   conn->sockfd = sockfd;
