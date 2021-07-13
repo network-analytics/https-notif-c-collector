@@ -22,9 +22,18 @@ AC_ARG_ENABLE([tcmalloc],
 
 AC_ARG_WITH([examples],
     [AS_HELP_STRING([--with-examples], [Build examples samples])],
-    [with_examples=yes],
-    [with_examples=no]
+    [ with_examples=yes ],
+    [ with_examples=no ]
 )
+
+AC_ARG_WITH([pkgconfigdir],
+    [AS_HELP_STRING([--with-pkgconfigdir], [pkg-config directory to install the .pc file.])],
+    [ with_pkgconfigdir=$with_pkgconfigdir ],
+    [ with_pkgconfigdir=$libdir/pkgconfig ]
+)
+
+PKGCONFIG_USER=$with_pkgconfigdir
+AC_SUBST([PKGCONFIG_USER])
 
 AM_CONDITIONAL(EXAMPLES, test "x$with_examples" = "xyes")
 

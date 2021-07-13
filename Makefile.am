@@ -8,7 +8,8 @@ endif
 
 ACLOCAL_AMFLAGS = -I m4
 
-pkgconfigdir = $(libdir)/pkgconfig
+# PKGCONFIG_USER comes from configure.ac
+pkgconfigdir = $(PKGCONFIG_USER)
 pkgconfig_DATA = \
 	unyte-https-notif.pc \
 	$(NULL)
