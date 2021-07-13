@@ -1,53 +1,8 @@
 # C-Collector for HTTPS-notif protocol
 Library for collecting HTTPS-notif protocol messages defined on the IETF draft [draft-ietf-netconf-https-notif-08](https://datatracker.ietf.org/doc/html/draft-ietf-netconf-https-notif-08).
 
-## Dependencies
-The library uses `libmicrohttpd` as a HTTPS server. **The library should be compiled and installed including TLS support.**
-### Ubuntu
-```shell
-$ sudo apt install libgnutls28-dev libgcrypt20
-$ wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.73.tar.gz
-$ tar -xf libmicrohttpd-0.9.73.tar.gz
-$ cd libmicrohttpd-0.9.73
-$ ./configure           # check HTTPS support is activated
-$ make
-$ sudo make install
-```
-
-### Centos 7
-```shell
-$ sudo yum install gnutls-devel
-$ wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.73.tar.gz
-$ tar -xf libmicrohttpd-0.9.73.tar.gz
-$ cd libmicrohttpd-0.9.73
-$ ./configure           # check HTTPS support is activated
-$ make
-$ sudo make install
-```
-
-## Compiling project 
-This project uses autotools to compile and install the library.
-
-### Installing
-To install the library on a linux machine.
-```shell
-$ ./bootstrap
-$ ./configure         # See "./configure --help" for options
-$ make
-$ make install        # Usually needs sudo permissions
-$ ./export.sh         # Optional: export LD_LIBRARY_PATH with /usr/local/lib in global variable to allow linking process
-```
-
-#### Configure options
-There are some custom `./configure` options : 
-- `--with-examples`: compile examples directory. Not compiled by default.
-- `--enable-tcmalloc`: enable compilation with tcmalloc instead of native malloc. tcmalloc should be installed first.
-
-### Uninstalling
-```shell
-$ sudo make uninstall
-```
-You should remove the export of the lib in your `.bashrc` manually yourself to fully remove the lib.
+## Compiling and building the project
+See [INSTALL](INSTALL.md)
 
 ## Usage
 The collector allows to read HTTPS-notif protocol messages from a ip/port specified on the parameters. It allows to get directly the buffer and the metadata of the message in a struct.

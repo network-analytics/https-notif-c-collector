@@ -35,6 +35,9 @@ AC_CHECK_LIB(microhttpd, MHD_start_daemon, [], [
 ])
 AC_CHECK_HEADERS([microhttpd.h])
 
+PKG_PROG_PKG_CONFIG
+PKG_CHECK_MODULES([LIBMICROHTTPD], [libmicrohttpd >= 0.9.73])
+
 if test "x$tcmalloc_enabled" = "xyes"
 then
     AC_CHECK_LIB(tcmalloc, malloc, [], [
