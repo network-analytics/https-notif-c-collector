@@ -3,24 +3,48 @@ Library for collecting HTTPS-notif protocol messages defined on the IETF draft [
 
 ## Dependencies
 The library uses `libmicrohttpd` as a HTTPS server. **The library should be compiled and installed including TLS support.**
-
-- [libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/): https library
-    - `libgnutls28-dev libgcrypt20`: dependencies for libmicrohttpd TLS module (tested on `Ubuntu`)
-    - `gnutls-devel`: dependencies for libmicrohttpd TLS module (tested on `CentOS 7`)
-
-## Build & install 
-To build the project and test example clients, just `make` on root folder. Il will compile with gcc all dependencies and the clients.
-
-### Installing
-To install the library on a machine, run `make install` with sudo and `export.sh` without sudo. Export script will export the LD_LIBRARY_PATH on user space.
-```
+### Ubuntu
+```shell
+$ sudo apt install libgnutls28-dev libgcrypt20
+$ wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.73.tar.gz
+$ tar -xf libmicrohttpd-0.9.73.tar.gz
+$ cd libmicrohttpd-0.9.73
+$ ./configure           # check HTTPS support is activated
 $ make
 $ sudo make install
-$ ./export.sh
 ```
 
-### Uninstalling
+### Centos 7
+```shell
+$ sudo yum install gnutls-devel
+$ wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.73.tar.gz
+$ tar -xf libmicrohttpd-0.9.73.tar.gz
+$ cd libmicrohttpd-0.9.73
+$ ./configure           # check HTTPS support is activated
+$ make
+$ sudo make install
 ```
+
+## Compiling project 
+This project uses autotools to compile and install the library.
+
+### Installing
+To install the library on a linux machine.
+```shell
+$ ./bootstrap
+$ ./configure         # See "./configure --help" for options
+$ make
+$ make install        # Usually needs sudo permissions
+$ ./export.sh         # Optional: export LD_LIBRARY_PATH with /usr/local/lib in global variable to allow linking process
+```
+
+#### Configure options
+There are some custom `./configure` options : 
+- `--with-examples`: compile examples directory. Not compiled by default.
+- `--enable-tcmalloc`: enable compilation with tcmalloc instead of native malloc. tcmalloc should be installed first.
+
+### Uninstalling
+```shell
 $ sudo make uninstall
 ```
 You should remove the export of the lib in your `.bashrc` manually yourself to fully remove the lib.
@@ -34,7 +58,9 @@ The api is in `unyte_https_collector.h` :
 - `int unyte_https_free_msg(unyte_https_msg_met_t * msg)` from `unyte_https_collector.h`: free all struct used on a message received.
 
 Simple example of usage of a client [client_sample.c](examples/client_sample.c):
-```
+
+/!\ To run the samples, a TLS private key and certificate should be generated first. See [TLS layer](#TLS-layer).
+```c
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -104,7 +130,7 @@ int main()
 
 ### Message data
 To process the message data, all the headers, meta-data and payload are found on the struct unyte_https_msg_met_t defined on unyte_https_utils.h:
-```
+```c
 typedef struct unyte_msg_with_metadata
 {
   uint16_t src_port;     // source port
@@ -123,7 +149,7 @@ typedef struct unyte_msg_with_metadata
 
 ### TLS layer
 To use/test TLS layer, you should generate the certificate first :
-```
+```shell
 $ openssl genrsa -out private.key 2048
 $ openssl req -days 365 -out certificate.pem -new -x509 -key private.key
 ```
