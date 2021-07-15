@@ -5,6 +5,7 @@ This project uses autotools to build the library and `libmicrohttpd` for the HTT
 
 On Ubuntu:
 ```shell
+$ sudo apt-get update
 $ sudo apt-get install autoconf libtool make automake gcc pkg-config        # autotools and gcc
 $ sudo apt-get install libgnutls28-dev libgcrypt20                          # libgnutls for microhttpd
 $ mkdir microhttpd && cd microhttpd                                         # Use a tmp directory
@@ -50,7 +51,7 @@ To use eBPF loadbalancing `Python3` is needed for eBPF compilation.
 On Ubuntu:
 ```shell
 $ # install python3
-$ sudo apt install linux-headers-$(uname -r) clang bpf
+$ sudo apt install linux-headers-$(uname -r) clang libbpf-dev linux-tools-$(uname -r)
 ```
 
 On Centos:
@@ -74,9 +75,10 @@ $ ./export.sh         # Optional: export LD_LIBRARY_PATH with /usr/local/lib in 
 #### Configure options
 There are some custom `./configure` options : 
 - `--with-examples`: compile examples directory. Not compiled by default.
-- `--with-pkgconfigdir=[/own_path/pkgconfig]`: overwrite pkgconfig directory to install .pc file [default: ${PREFIX}/lib/pkgconfig]
+- `--with-pkgconfigdir=[/own_path/pkgconfig]`: overwrite pkgconfig directory to install .pc file [default: ${PREFIX}/lib/pkgconfig].
 - `--enable-tcmalloc`: enable compilation with tcmalloc instead of native malloc. tcmalloc should be installed first.
 - `--enable-ebpf-loadbalancing`: enable eBPF reuseport loadbalancer to https-notif. Allows to launch multiple instances of the collector on the same port and use IP loadbalancing for the reuseport socket pool instead of IP/port (default by the kernel).
+- `--with-linux=[/own_path/linux/src]`: linux source code necesary for eBPF compilation [default: /usr/src/linux]. (On Ubuntu use /usr/src/<linux>-generic version)
 
 ### Uninstalling
 ```shell
