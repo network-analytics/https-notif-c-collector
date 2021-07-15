@@ -11,14 +11,14 @@ EBPF_CLDFLAGS=-fcolor-diagnostics -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g 
 vmlinux.h:
 	bpftool btf dump file /sys/kernel/btf/vmlinux format c > $@
 
-unyte_reuseport_kern.o: vmlinux.h
-	clang $(LINUX_H) $(EBPF_CLDFLAGS) -o $@ -c unyte_reuseport_kern.c
+unyte_https_reuseport_kern.o: vmlinux.h
+	clang $(LINUX_H) $(EBPF_CLDFLAGS) -o $@ -c unyte_https_reuseport_kern.c
 
-all-local: unyte_reuseport_kern.o
+all-local: unyte_https_reuseport_kern.o
 
-unyte_reuseport_kern_odir = $(libdir)
-unyte_reuseport_kern_o_DATA = \
-	unyte_reuseport_kern.o \
+unyte_https_reuseport_kern_odir = $(libdir)
+unyte_https_reuseport_kern_o_DATA = \
+	unyte_https_reuseport_kern.o \
 	$(NULL)
 
 endif
@@ -55,10 +55,10 @@ if EBPF
 
 libunyte_https_notif_la_CFLAGS += -D_USE_EBPF_REUSEPORT
 libunyte_https_notif_la_SOURCES +=  \
-    unyte_reuseport_user.c          \
-    unyte_reuseport_user.h          \
+    unyte_https_reuseport_user.c    \
+    unyte_https_reuseport_user.h    \
     $(NULL)
 
-unyteinclude_HEADERS += unyte_reuseport_user.h
+unyteinclude_HEADERS += unyte_https_reuseport_user.h
 
 endif

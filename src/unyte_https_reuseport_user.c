@@ -11,7 +11,7 @@
 #include <linux/unistd.h>
 #include <stdlib.h>
 
-#define BPF_KERNEL_PRG "unyte_reuseport_kern.o"
+#define BPF_KERNEL_PRG "unyte_https_reuseport_kern.o"
 
 const char NONCE_PATH[] = "/sys/fs/bpf/nonce";
 const char TCP_MAP_PATH[] = "/sys/fs/bpf/tcpmap";

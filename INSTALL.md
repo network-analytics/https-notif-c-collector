@@ -19,7 +19,7 @@ $ sudo make install
 
 On Centos (tested on `Centos 8`):
 ```shell
-$ sudo yum install autoconf libtool make automake pkgconf               # autotools and gcc
+$ sudo yum install gcc autoconf libtool make automake pkgconf           # autotools and gcc
 $ sudo yum install gnutls-devel
 $ mkdir microhttpd && cd microhttpd                                     # Use a tmp directory
 $ wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.73.tar.gz
@@ -50,13 +50,14 @@ To use eBPF loadbalancing `Python3` is needed for eBPF compilation.
 
 On Ubuntu:
 ```shell
-$ # install python3
 $ sudo apt install linux-headers-$(uname -r) clang libbpf-dev linux-tools-$(uname -r)
 ```
 
-On Centos:
+On Centos (tested on `Centos 8`):
 ```shell
-$ # TODO:
+$ sudo yum install kernel-headers clang
+$ sudo dnf --enablerepo=powertools install libbpf-devel
+$ sudo dnf install bpftool
 ```
 
 ## Compiling project 

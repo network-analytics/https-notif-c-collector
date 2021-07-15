@@ -11,7 +11,7 @@
 #include "unyte_https_queue.h"
 
 #if _USE_EBPF_REUSEPORT
-#include "unyte_reuseport_user.h"
+#include "unyte_https_reuseport_user.h"
 #endif
 
 void set_defaults(unyte_https_options_t *options)
