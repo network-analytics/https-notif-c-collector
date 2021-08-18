@@ -223,12 +223,12 @@ struct unyte_daemon *start_https_server_daemon(unyte_https_sock_t *conn, unyte_h
   daemon_in->output_queue = output_queue;
   daemon_in->capabilities = capabilities;
 
-  struct MHD_Daemon *d = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_SSL,
+  struct MHD_Daemon *d = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_TLS,
                                           0, NULL, NULL,
                                           &dispatcher, daemon_in,
                                           MHD_OPTION_HTTPS_MEM_KEY, key_pem,
                                           MHD_OPTION_HTTPS_MEM_CERT, cert_pem,
-                                          MHD_OPTION_LISTEN_SOCKET, *conn->sockfd,
+                                          MHD_OPTION_LISTEN_SOCKET, conn->sockfd,
                                           MHD_OPTION_END);
   if (NULL == d)
   {

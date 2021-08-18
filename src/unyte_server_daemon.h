@@ -18,8 +18,8 @@
 
 typedef struct
 {
-  struct sockaddr_in *addr; // The socket addr
-  int *sockfd;              // The socket file descriptor
+  struct addrinfo *addr; // The socket addr
+  int sockfd;               // The socket file descriptor
 } unyte_https_sock_t;
 
 typedef struct

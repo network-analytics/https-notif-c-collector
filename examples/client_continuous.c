@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 
   unyte_https_options_t options = {0};
   options.address = argv[1];
-  options.port = atoi(argv[2]);
+  options.port = argv[2];
   options.cert_pem = cert_pem;
   options.key_pem = key_pem;
   options.sock_buff_size = SK_BUFF_SIZE;
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
   pthread_t *threads = (pthread_t *)malloc(sizeof(pthread_t) * client_threads);
 
   unyte_https_collector_t *collector = unyte_https_start_collector(&options);
-  printf("Starting collector on %s:%d\n", options.address, options.port);
+  printf("Starting collector on %s:%s\n", options.address, options.port);
 
   struct https_th_input input = {0};
   input.queue = collector->queue;
