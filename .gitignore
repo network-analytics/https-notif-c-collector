@@ -53,6 +53,9 @@ dkms.conf
 
 client_sample
 client_continuous
+client_socket
+client_ebpf_user
+vmlinux.h
 libunyte-https-notif.so
 unyte-https-notif.pc
 .vscode
@@ -104,9 +107,10 @@ m4/lt~obsolete.m4
 *.lo
 Makefile
 src/libunyte-https-notif.la
-examples/.deps
-examples/.libs
+examples/**/.deps
+examples/**/.libs
 src/.deps
 src/.libs
 config.h
 libtool
+**/obj/*.h

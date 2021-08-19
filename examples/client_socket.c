@@ -1,13 +1,19 @@
 /**
- * Sample to show how to consume HTTPS-notif protocol using the library
+ * Sample to show how to consume HTTPS-notif protocol using the library and a custom socket
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
 
 #include "../src/unyte_https_collector.h"
 #include "../src/unyte_https_utils.h"
+#include "../src/unyte_https_defaults.h"
 
 #define MAX_TO_RECEIVE 10
 #define SERVERKEYFILE "private.key"      // Should be generated before run this sample
@@ -42,6 +48,71 @@ char *load_file(const char *file_path)
   return buffer;
 }
 
+int create_socket(char *addr, char *port, uint64_t buff_size, int backlog)
+{
+  struct addrinfo *addr_info;
+  struct addrinfo hints;
+
+  memset(&hints, 0, sizeof(hints));
+
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_flags = AI_PASSIVE | AI_NUMERICSERV;
+
+  // Using getaddrinfo to support both IPv4 and IPv6
+  int rc = getaddrinfo(addr, port, &hints, &addr_info);
+
+  if (rc != 0) {
+    printf("getaddrinfo error: %s\n", gai_strerror(rc));
+    exit(EXIT_FAILURE);
+  }
+
+  printf("Address type: %s | %d\n", (addr_info->ai_family == AF_INET) ? "IPv4" : "IPv6", ntohs(((struct sockaddr_in *)addr_info->ai_addr)->sin_port));
+
+  int sockfd = socket(addr_info->ai_family, addr_info->ai_socktype, addr_info->ai_protocol);
+
+  if (sockfd < 0)
+  {
+    perror("Cannot create socket");
+    exit(EXIT_FAILURE);
+  }
+
+  int optval = 1;
+  // enabling SO_REUSEPORT to loadbalance between multiple collectors
+  if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(int)) < 0)
+  {
+    perror("Cannot set SO_REUSEPORT option on socket");
+    exit(EXIT_FAILURE);
+  }
+
+  // Setting custom buffer size
+  if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &buff_size, sizeof(buff_size)) < 0)
+  {
+    perror("Cannot set buffer size");
+    exit(EXIT_FAILURE);
+  }
+
+  if (bind(sockfd, addr_info->ai_addr, (int)addr_info->ai_addrlen) != 0)
+  {
+    perror("Bind failed");
+    close(sockfd);
+    exit(EXIT_FAILURE);
+  }
+
+  // listen to socket file descriptor using custom backlog
+  if (listen(sockfd, backlog) != 0)
+  {
+    perror("Listen failed");
+    close(sockfd);
+    exit(EXIT_FAILURE);
+  }
+
+  // free addr_info after usage
+  freeaddrinfo(addr_info);
+
+  return sockfd;
+}
+
 int main(int argc, char *argv[])
 {
   if (argc != 3)
@@ -60,16 +131,18 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  unyte_https_options_t options = {0};
-  options.address = argv[1];
-  options.port = argv[2];
+  // creating and listening to socket using 20MB of socket buffer and a backlog of 10
+  int socketfd = create_socket(argv[1], argv[2], DF_SOCK_BUFF_SIZE, DF_SOCK_LISTEN_BACKLOG);
+
+  unyte_https_sk_options_t options = {0};
+  options.socket_fd = socketfd;
   options.cert_pem = cert_pem;
   options.key_pem = key_pem;
   options.disable_xml_encoding = true;
   options.disable_json_encoding = false;
 
-  unyte_https_collector_t *collector = unyte_https_start_collector(&options);
-  printf("Starting collector on %s:%s\n", options.address, options.port);
+  unyte_https_collector_t *collector = unyte_https_start_collector_sk(&options);
+  printf("Starting collector on %s:%s\n", argv[1], argv[2]);
 
   uint count = 0;
   while (count < MAX_TO_RECEIVE)

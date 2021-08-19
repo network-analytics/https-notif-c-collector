@@ -12,18 +12,26 @@ LT_INIT
 AC_LANG([C])
 AC_CONFIG_HEADERS([config.h])
 AC_PROG_CC([gcc])
+AC_CONFIG_SRCDIR(src/unyte_https_collector.c)
 
 AC_PROG_LN_S
 
 AC_ARG_ENABLE([tcmalloc],
     [AS_HELP_STRING([--enable-tcmalloc], [Use tcmalloc instead of native malloc. tcmalloc should be installed first.])],
-    [ tcmalloc_enabled=yes ]
+    [ tcmalloc_enabled=yes ],
+    [ tcmalloc_enabled=no ]
 )
 
 AC_ARG_WITH([examples],
     [AS_HELP_STRING([--with-examples], [Build examples samples])],
     [ with_examples=yes ],
     [ with_examples=no ]
+)
+
+AC_ARG_WITH([ebpf-example],
+    [AS_HELP_STRING([--with-ebpf-example], [Build eBPF example])],
+    [ with_ebpf_example=yes ],
+    [ with_ebpf_example=no ]
 )
 
 AC_ARG_WITH([pkgconfigdir],
@@ -36,6 +44,7 @@ PKGCONFIG_USER=$with_pkgconfigdir
 AC_SUBST([PKGCONFIG_USER])
 
 AM_CONDITIONAL(EXAMPLES, test "x$with_examples" = "xyes")
+AM_CONDITIONAL(EBPF_EXAMPLE, test "x$with_ebpf_example" = "xyes")
 
 dnl Check for microhttpd
 AC_CHECK_LIB(microhttpd, MHD_start_daemon, [], [
@@ -57,10 +66,59 @@ then
     AC_SUBST([EXTRA_LDFLAGS])
 fi
 
+if test "x$with_ebpf_example" = "xyes"
+then
+    AC_CHECK_LIB(bpf, bpf_object__find_map_by_name, [], [
+        echo "*** Error! You need to install libbpf first. ***"
+        exit -1
+    ])
+
+    AC_CHECK_PROG([CCLANG], [clang], [yes])
+    AS_IF([ test "x$CCLANG" != xyes ], [
+        echo "*** Error! eBPF needs CLANG as dependency. Please install it first. ***"
+        exit -1
+    ])
+    AC_CHECK_PROG([BPFTOOL], [bpftool], [yes])
+    AS_IF([ test "x$BPFTOOL" != xyes ], [
+        echo "*** Error! eBPF needs bpftool as dependency. Please install it first. ***"
+        exit -1
+    ])
+
+    AC_CHECK_FILE([/sys/kernel/btf/vmlinux], [], [
+        echo "*** Error! eBPF needs vmlinux to compile the eBPF program. ***"
+        exit -1
+    ])
+
+    AC_ARG_WITH([linux],
+        [AS_HELP_STRING([--with-linux], [Linux source headers [[default: /usr/src/linux]]])],
+        [LINUX_HEADERS="$withval"],
+        [LINUX_HEADERS=/usr/src/linux]
+    )
+    AC_SUBST([LINUX_HEADERS])
+    dnl linux source headers
+    AC_CHECK_FILES([
+        $LINUX_HEADERS/include/uapi/linux
+        $LINUX_HEADERS/arch/x86/include
+        $LINUX_HEADERS/arch/x86/include/generated
+        $LINUX_HEADERS/include
+        $LINUX_HEADERS/arch/x86/include/uapi
+        $LINUX_HEADERS/arch/x86/include/generated/uapi
+        $LINUX_HEADERS/include/uapi
+        $LINUX_HEADERS/include/generated/uapi
+        ], [], [
+            echo "*** Error! eBPFa needs linux source to compile the eBPF program. ***"
+            echo "*** Linux sources were not found in $LINUX_HEADERS ***"
+            exit -1
+        ]
+    )
+    dnl TODO: check for bpf dependencies
+fi
+
 AC_CONFIG_FILES([
     Makefile
     src/Makefile
     examples/Makefile
+    examples/eBPF/Makefile
     unyte-https-notif.pc
 ])
 AC_OUTPUT

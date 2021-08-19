@@ -5,6 +5,7 @@ This project uses autotools to build the library and `libmicrohttpd` for the HTT
 
 On Ubuntu:
 ```shell
+$ sudo apt-get update
 $ sudo apt-get install autoconf libtool make automake gcc pkg-config        # autotools and gcc
 $ sudo apt-get install libgnutls28-dev libgcrypt20                          # libgnutls for microhttpd
 $ mkdir microhttpd && cd microhttpd                                         # Use a tmp directory
@@ -18,7 +19,7 @@ $ sudo make install
 
 On Centos (tested on `Centos 8`):
 ```shell
-$ sudo yum install autoconf libtool make automake pkgconf               # autotools and gcc
+$ sudo yum install gcc autoconf libtool make automake pkgconf           # autotools and gcc
 $ sudo yum install gnutls-devel
 $ mkdir microhttpd && cd microhttpd                                     # Use a tmp directory
 $ wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.73.tar.gz
@@ -44,6 +45,21 @@ On Centos (tested on `Centos 8`):
 $ sudo yum install gperftools gperftools-devel
 ```
 
+#### Using eBPF loadbalancer based on IP only
+To use eBPF loadbalancing `Python3` is needed for eBPF compilation.
+
+On Ubuntu:
+```shell
+$ sudo apt install linux-headers-$(uname -r) clang libbpf-dev linux-tools-$(uname -r)
+```
+
+On Centos (tested on `Centos 8`):
+```shell
+$ sudo yum install kernel-headers clang
+$ sudo dnf --enablerepo=powertools install libbpf-devel
+$ sudo dnf install bpftool
+```
+
 ## Compiling project 
 This project uses autotools to compile and install the library.
 
@@ -60,8 +76,10 @@ $ ./export.sh         # Optional: export LD_LIBRARY_PATH with /usr/local/lib in 
 #### Configure options
 There are some custom `./configure` options : 
 - `--with-examples`: compile examples directory. Not compiled by default.
-- `--with-pkgconfigdir=[/own_path/pkgconfig]`: overwrite pkgconfig directory to install .pc file [default: ${PREFIX}/lib/pkgconfig]
+- `--with-ebpf-example`: compile eBPF example. Not compiled by default. Allows to launch multiple instances of the collector on the same port and use IP loadbalancing for the reuseport socket pool instead of IP/port (default by the kernel).
+- `--with-pkgconfigdir=[/own_path/pkgconfig]`: overwrite pkgconfig directory to install .pc file [default: ${PREFIX}/lib/pkgconfig].
 - `--enable-tcmalloc`: enable compilation with tcmalloc instead of native malloc. tcmalloc should be installed first.
+- `--with-linux=[/own_path/linux/src]`: linux source code necesary for eBPF compilation [default: /usr/src/linux]. (On Ubuntu use /usr/src/<linux>-generic version)
 
 ### Uninstalling
 ```shell

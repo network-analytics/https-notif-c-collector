@@ -12,6 +12,8 @@
 #define MAX_TO_RECEIVE 200
 #define SERVERKEYFILE "private.key"      // Should be generated before run this sample
 #define SERVERCERTFILE "certificate.pem" // Should be generated before run this sample
+#define SK_BUFF_SIZE 20971520
+#define SK_BACKLOG_SIZE 1000
 
 /**
  * Read file and return bytes
@@ -77,7 +79,7 @@ void *t_https_read(void *in)
   struct timespec stop;
   struct timespec diff;
 
-  while (count < input->count)
+  while (1)
   {
     void *res = unyte_https_queue_read(input->queue);
     unyte_https_msg_met_t *msg = (unyte_https_msg_met_t *)res;
@@ -132,15 +134,17 @@ int main(int argc, char *argv[])
 
   unyte_https_options_t options = {0};
   options.address = argv[1];
-  options.port = atoi(argv[2]);
+  options.port = argv[2];
   options.cert_pem = cert_pem;
   options.key_pem = key_pem;
+  options.sock_buff_size = SK_BUFF_SIZE;
+  options.sock_listen_backlog = SK_BACKLOG_SIZE;
 
   uint client_threads = atoi(argv[4]);
   pthread_t *threads = (pthread_t *)malloc(sizeof(pthread_t) * client_threads);
 
   unyte_https_collector_t *collector = unyte_https_start_collector(&options);
-  printf("Starting collector on %s:%d\n", options.address, options.port);
+  printf("Starting collector on %s:%s\n", options.address, options.port);
 
   struct https_th_input input = {0};
   input.queue = collector->queue;
