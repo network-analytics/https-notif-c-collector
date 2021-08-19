@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
 
 #include "../src/unyte_https_collector.h"
 #include "../src/unyte_https_utils.h"
@@ -79,8 +80,7 @@ int main(int argc, char *argv[])
 
     print_https_notif_msg(msg, stdout);
 
-    // printf("unyte_https_get_src_port: %u\n", unyte_https_get_src_port(msg));
-    // printf("unyte_https_get_src_addr: %u\n", unyte_https_get_src_addr(msg));
+    // printf("unyte_https_get_src: %s\n", unyte_https_get_src(msg)->ss_family == AF_INET ? "IPv4" : "IPv6");
     // printf("unyte_https_get_payload: %s\n", unyte_https_get_payload(msg));
     // printf("unyte_https_get_payload_length: %lu\n", unyte_https_get_payload_length(msg));
     // printf("unyte_https_get_content_type: %s\n", unyte_https_get_content_type(msg));

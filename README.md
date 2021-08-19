@@ -57,8 +57,7 @@ int main()
     unyte_https_msg_met_t *msg = (unyte_https_msg_met_t *)res;
 
     // TODO: Process the HTTPS-notif message here
-    printf("unyte_https_get_src_port: %u\n", unyte_https_get_src_port(msg));
-    printf("unyte_https_get_src_addr: %u\n", unyte_https_get_src_addr(msg));
+    printf("unyte_https_get_src: %s\n", unyte_https_get_src(msg)->ss_family == AF_INET ? "IPv4" : "IPv6");
     printf("unyte_https_get_payload: %s\n", unyte_https_get_payload(msg));
     printf("unyte_https_get_payload_length: %lu\n", unyte_https_get_payload_length(msg));
     printf("unyte_https_get_content_type: %s\n", unyte_https_get_content_type(msg));

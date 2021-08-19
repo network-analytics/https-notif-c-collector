@@ -10,22 +10,38 @@
 #include "unyte_https_queue.h"
 #include "unyte_https_utils.h"
 
+void copy_src_address(struct sockaddr *client_addr, struct sockaddr_storage *dest)
+{
+  if (client_addr->sa_family == AF_INET)
+  {
+    ((struct sockaddr_in *)dest)->sin_family = AF_INET;
+    ((struct sockaddr_in *)dest)->sin_addr = ((struct sockaddr_in *)client_addr)->sin_addr;
+    ((struct sockaddr_in *)dest)->sin_port = ((struct sockaddr_in *)client_addr)->sin_port;
+  }
+  else if (client_addr->sa_family == AF_INET6)
+  {
+    ((struct sockaddr_in6 *)dest)->sin6_family = AF_INET6;
+    ((struct sockaddr_in6 *)dest)->sin6_addr = ((struct sockaddr_in6 *)client_addr)->sin6_addr;
+    ((struct sockaddr_in6 *)dest)->sin6_port = ((struct sockaddr_in6 *)client_addr)->sin6_port;
+  }
+}
+
 unyte_https_msg_met_t *generate_https_msg_met(struct MHD_Connection *connection, struct unyte_https_body *body_buff, char *req_content_type)
 {
   unyte_https_msg_met_t *msg = (unyte_https_msg_met_t *)malloc(sizeof(unyte_https_msg_met_t));
-  if (msg == NULL)
+  struct sockaddr_storage *src_addr = (struct sockaddr_storage *)malloc(sizeof(struct sockaddr_storage));
+  if (msg == NULL || src_addr == NULL)
   {
     printf("Malloc failed\n");
     return NULL;
   }
 
+  msg->src = src_addr;
   msg->payload = body_buff->buffer;
   msg->payload_length = body_buff->buffer_size;
   msg->content_type = req_content_type;
   const union MHD_ConnectionInfo *info = MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
-  struct sockaddr_in *sk = (struct sockaddr_in *)info->client_addr;
-  msg->src_addr = ntohl(sk->sin_addr.s_addr);
-  msg->src_port = ntohs(sk->sin_port);
+  copy_src_address(info->client_addr, msg->src);
   return msg;
 }
 
@@ -223,7 +239,7 @@ struct unyte_daemon *start_https_server_daemon(unyte_https_sock_t *conn, unyte_h
   daemon_in->output_queue = output_queue;
   daemon_in->capabilities = capabilities;
 
-  struct MHD_Daemon *d = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_TLS,
+  struct MHD_Daemon *d = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_TLS | MHD_USE_DUAL_STACK,
                                           0, NULL, NULL,
                                           &dispatcher, daemon_in,
                                           MHD_OPTION_HTTPS_MEM_KEY, key_pem,
