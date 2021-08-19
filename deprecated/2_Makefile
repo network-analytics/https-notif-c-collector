@@ -1,0 +1,79 @@
+###### GCC options ######
+CC=gcc
+LDFLAGS=-g
+CFLAGS=-Wextra -Wall -ansi -g -std=c11 -D_GNU_SOURCE -fPIC
+
+###### Clang options ######
+CCLANG=clang
+CLANG_CFLAGS=-fcolor-diagnostics -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -fPIC -g -O2 -D__KERNEL__ -D__TARGET_ARCH_x86 --target=bpf -Wall -Wno-macro-redefined -D__BPF_TRACING__
+
+###### Python options ######
+PYTHON=python
+
+## TCMALLOCFLAGS for tcmalloc
+TCMALLOCFLAGS=-ltcmalloc -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+TCMALLOCFLAGS=
+
+## For test third parties lib
+USE_LIB=$(shell pkg-config --cflags --libs unyte-https-notif)
+USE_LIB=
+
+## Using libmicrohttpd
+HTTPS_LIB=$(shell pkg-config --cflags --libs libmicrohttpd)
+LIBCURL_LIB=$(shell pkg-config --cflags --libs libcurl)
+
+## BPF library
+BPFTOOL=/usr/bin/bpftool
+LIBBPF_LIB=$(shell pkg-config --cflags --libs libbpf)
+LINUX_SRC=/usr/src/linux
+LINUX_H=-I$(LINUX_SRC)/arch/x86/include -I$(LINUX_SRC)/arch/x86/include/generated -I$(LINUX_SRC)/include -I$(LINUX_SRC)/arch/x86/include/uapi -I$(LINUX_SRC)/arch/x86/include/generated/uapi -I$(LINUX_SRC)/include/uapi -I$(LINUX_SRC)/include/generated/uapi
+
+###### c-collector source code ######
+SDIR=src
+ODIR=obj
+_OBJS=unyte_https_queue.o unyte_https_collector.o unyte_https_utils.o unyte_server_daemon.o unyte_https_capabilities.o unyte_reuseport_user.o
+OBJS=$(patsubst %,$(ODIR)/%,$(_OBJS))
+
+###### c-collector source headers ######
+_DEPS=unyte_https_queue.h unyte_https_collector.h unyte_https_utils.h unyte_server_daemon.h unyte_https_defaults.h unyte_https_capabilities.h unyte_reuseport_user.h
+DEPS=$(patsubst %,$(SDIR)/%,$(_DEPS))
+
+###### c-collector examples ######
+EXAMPLES_DIR=examples
+EXAMPLES_ODIR=$(EXAMPLES_DIR)/obj
+
+BINS=client_sample client_continuous unyte_reuseport_kern.o
+
+all: libunyte-https-notif.so $(BINS)
+
+$(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(EXAMPLES_ODIR)/%.o: $(EXAMPLES_DIR)/%.c 
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(SDIR)/vmlinux.h:
+	$(BPFTOOL) btf dump file /sys/kernel/btf/vmlinux format c > $@
+
+unyte_reuseport_kern.o: $(SDIR)/vmlinux.h
+	$(CCLANG) $(LINUX_H) $(CLANG_CFLAGS) -o $@ -c $(SDIR)/unyte_reuseport_kern.c
+
+libunyte-https-notif.so: $(OBJS)
+	$(CC) -shared -o libunyte-https-notif.so $(OBJS) $(HTTPS_LIB)
+
+client_sample: $(EXAMPLES_ODIR)/client_sample.o $(OBJS)
+	$(CC) -pthread -o $@ $^ $(LDFLAGS) $(HTTPS_LIB) $(LIBBPF_LIB)
+
+client_continuous: $(EXAMPLES_ODIR)/client_continuous.o $(OBJS)
+	$(CC) -pthread -o $@ $^ $(LDFLAGS) $(HTTPS_LIB) $(LIBBPF_LIB)
+
+install: libunyte-https-notif.so
+	./install.sh
+
+uninstall:
+	./uninstall.sh
+
+build: libunyte-https-notif.so
+
+clean:
+	rm $(ODIR)/*.o $(EXAMPLES_ODIR)/*.o $(BINS) libunyte-https-notif.so

@@ -1,29 +1,8 @@
 # C-Collector for HTTPS-notif protocol
 Library for collecting HTTPS-notif protocol messages defined on the IETF draft [draft-ietf-netconf-https-notif-08](https://datatracker.ietf.org/doc/html/draft-ietf-netconf-https-notif-08).
 
-## Dependencies
-The library uses `libmicrohttpd` as a HTTPS server. **The library should be compiled and installed including TLS support.**
-
-- [libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/): https library
-    - `libgnutls28-dev libgcrypt20`: dependencies for libmicrohttpd TLS module (tested on `Ubuntu`)
-    - `gnutls-devel`: dependencies for libmicrohttpd TLS module (tested on `CentOS 7`)
-
-## Build & install 
-To build the project and test example clients, just `make` on root folder. Il will compile with gcc all dependencies and the clients.
-
-### Installing
-To install the library on a machine, run `make install` with sudo and `export.sh` without sudo. Export script will export the LD_LIBRARY_PATH on user space.
-```
-$ make
-$ sudo make install
-$ ./export.sh
-```
-
-### Uninstalling
-```
-$ sudo make uninstall
-```
-You should remove the export of the lib in your `.bashrc` manually yourself to fully remove the lib.
+## Compiling and building the project
+See [INSTALL](INSTALL.md)
 
 ## Usage
 The collector allows to read HTTPS-notif protocol messages from a ip/port specified on the parameters. It allows to get directly the buffer and the metadata of the message in a struct.
@@ -34,7 +13,9 @@ The api is in `unyte_https_collector.h` :
 - `int unyte_https_free_msg(unyte_https_msg_met_t * msg)` from `unyte_https_collector.h`: free all struct used on a message received.
 
 Simple example of usage of a client [client_sample.c](examples/client_sample.c):
-```
+
+/!\ To run the samples, a TLS private key and certificate should be generated first. See [TLS layer](#TLS-layer).
+```c
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -104,7 +85,7 @@ int main()
 
 ### Message data
 To process the message data, all the headers, meta-data and payload are found on the struct unyte_https_msg_met_t defined on unyte_https_utils.h:
-```
+```c
 typedef struct unyte_msg_with_metadata
 {
   uint16_t src_port;     // source port
@@ -123,7 +104,7 @@ typedef struct unyte_msg_with_metadata
 
 ### TLS layer
 To use/test TLS layer, you should generate the certificate first :
-```
+```shell
 $ openssl genrsa -out private.key 2048
 $ openssl req -days 365 -out certificate.pem -new -x509 -key private.key
 ```
